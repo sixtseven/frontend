@@ -64,16 +64,18 @@
 			</p>
 
 			<!-- QR Code Display -->
-			<div
-				class="bg-white p-12 rounded-lg shadow-2xl inline-block mb-12 border-4 border-sixt-orange"
-			>
-				{#if qrCode}
-					<img src={qrCode} alt="Booking QR Code" class="w-96 h-96" />
-				{:else}
-					<div class="w-96 h-96 flex items-center justify-center">
-						<p class="text-gray-600">Generating QR code...</p>
-					</div>
-				{/if}
+			<div class="flex justify-center mb-12">
+				<div
+					class="bg-white p-8 md:p-12 rounded-lg shadow-2xl border-4 border-sixt-orange max-w-sm w-full"
+				>
+					{#if qrCode}
+						<img src={qrCode} alt="Booking QR Code" class="w-full h-auto aspect-square" />
+					{:else}
+						<div class="w-full aspect-square flex items-center justify-center">
+							<p class="text-gray-600">Generating QR code...</p>
+						</div>
+					{/if}
+				</div>
 			</div>
 
 			<!-- Booking ID -->
