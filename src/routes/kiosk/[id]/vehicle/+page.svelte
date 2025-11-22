@@ -303,7 +303,7 @@
 		<!-- Confirm button -->
 		<div class="flex justify-center gap-4">
 			<button
-				onclick={() => window.history.back()}
+				onclick={() => goto('/kiosk')}
 				class="px-8 py-3 bg-gray-700 hover:bg-gray-800 text-white font-bold rounded shadow transition"
 				disabled={isLoading}
 			>
