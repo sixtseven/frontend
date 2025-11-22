@@ -91,6 +91,11 @@
 	};
 
 	const speakWithElevenLabs = async (speechText: string) => {
+		if (!browser) {
+			console.warn('Cannot use ElevenLabs during SSR');
+			return;
+		}
+		
 		try {
 			isLoading = true;
 
@@ -179,9 +184,22 @@
 			console.error('Speech synthesis error:', event);
 			isSpeaking = false;
 			stopMouthAnimation();
+			
+			// If browser TTS fails due to "not-allowed", silently skip (no callback)
+			// This happens when there's no user interaction
+			if (event.error === 'not-allowed') {
+				console.warn('Browser TTS blocked - requires user interaction. Using silent mode.');
+				// Don't call onSpeechEnd to avoid breaking navigation
+			}
 		};
 
-		window.speechSynthesis.speak(utterance);
+		try {
+			window.speechSynthesis.speak(utterance);
+		} catch (err) {
+			console.error('Failed to start speech synthesis:', err);
+			isSpeaking = false;
+			stopMouthAnimation();
+		}
 	};
 
 	export const stop = () => {

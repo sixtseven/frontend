@@ -11,8 +11,10 @@
 	let isLoading = $state(false);
 
 	onMount(() => {
-		// Pre-select the first vehicle if available
-		if (data.vehicles.length > 0) {
+		// Pre-select the recommended vehicle (second one) if available
+		if (data.vehicles.length > 1) {
+			selectedVehicleId = data.vehicles[1].vehicle.id;
+		} else if (data.vehicles.length > 0) {
 			selectedVehicleId = data.vehicles[0].vehicle.id;
 		}
 	});
@@ -89,72 +91,114 @@
 	}
 </script>
 
-<div class="flex-grow bg-white flex flex-col">
+<div class="flex-grow bg-white flex flex-col relative">
 	<!-- Main content -->
-	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12">
-		<div class="mb-8 flex items-start gap-8">
+	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
+		<div class="mb-12 flex items-start justify-between gap-8">
 			<div class="flex-grow">
-				<h1 class="text-4xl font-bold text-gray-900 mb-2">Select Your Vehicle</h1>
+				<h1 class="text-4xl font-bold text-gray-900 mb-2">Your Vehicle Selection</h1>
 				<p class="text-lg text-gray-600">
-					Choose from {data.totalVehicles} available vehicles
+					We have a special recommendation for you
 				</p>
-			</div>
-			
-			<!-- Avatar section -->
-			<div class="flex-shrink-0">
-				<SpeakingAvatar
-					text="Please select your preferred vehicle from the available options."
-					idleImageUrl="/avatar-closed.png"
-					speakingImageUrl="/avatar-open.png"
-					useElevenLabs={true}
-					autoSpeak={true}
-				/>
 			</div>
 		</div>
 
-		<!-- Vehicle grid -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-			{#each data.vehicles as deal (deal.vehicle.id)}
-				{@const vehicle = deal.vehicle}
-				{@const isSelected = selectedVehicleId === vehicle.id}
-				{@const cardAttrs = getCardAttributes(vehicle)}
+		<!-- Original booked vehicle (small card) -->
+		{#if data.vehicles.length > 0}
+			{@const originalDeal = data.vehicles[0]}
+			{@const originalVehicle = originalDeal.vehicle}
+			{@const isOriginalSelected = selectedVehicleId === originalVehicle.id}
+			
+			<div class="mb-8">
 				<button
-					onclick={() => handleSelectVehicle(vehicle.id)}
-					class="relative flex flex-col bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden {isSelected
+					onclick={() => handleSelectVehicle(originalVehicle.id)}
+					class="w-full max-w-xl mx-auto flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
 						? 'ring-2 ring-sixt-orange'
 						: 'border border-gray-200'}"
 				>
-					<!-- Image container with fixed aspect ratio -->
-					<div
-						class="relative w-full bg-gradient-to-b from-gray-100 to-gray-50 flex items-center justify-center p-4"
-						style="aspect-ratio: 16/10;"
-					>
+					<!-- Small vehicle image -->
+					<div class="w-36 h-24 flex-shrink-0 bg-gradient-to-b from-gray-100 to-gray-50 rounded-lg flex items-center justify-center p-2 mr-3 relative">
 						<img
-							src={getMainImage(vehicle)}
-							alt="{vehicle.brand} {vehicle.model}"
+							src={getMainImage(originalVehicle)}
+							alt="{originalVehicle.brand} {originalVehicle.model}"
 							class="max-w-full max-h-full object-contain"
 						/>
+						
+						<!-- Your Original Booking badge -->
+						<div class="absolute top-1 left-1 bg-gray-600 text-white px-2 py-1 rounded text-[11px] font-semibold shadow-md">
+							Your Original Booking
+						</div>
+					</div>
 
-						<!-- Recommended/Discount badge -->
-						{#if vehicle.isRecommended || deal.dealInfo === 'DISCOUNT'}
-							<div
-								class="absolute top-3 left-3 bg-sixt-orange text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1"
-							>
-								{#if vehicle.isRecommended}
-									⭐ Recommended
-								{:else if deal.dealInfo === 'DISCOUNT'}
-									🎉 Discount
-								{/if}
-							</div>
+					<!-- Vehicle info -->
+					<div class="flex-grow text-left">
+						<h3 class="text-base font-bold text-gray-900">
+							{originalVehicle.brand} {originalVehicle.model}
+						</h3>
+						<p class="text-xs text-gray-500 mb-1">{originalVehicle.groupType}</p>
+						
+						{#if originalDeal.pricing.totalPrice.amount === 0}
+							<p class="text-xs text-gray-600">included in your booking</p>
+						{:else}
+							<p class="font-semibold text-sm text-gray-900">
+								{formatPrice(originalDeal.pricing.displayPrice)}
+								<span class="text-xs font-normal">{originalDeal.pricing.displayPrice.suffix}</span>
+							</p>
 						{/if}
+					</div>
+
+					<!-- Selection indicator -->
+					{#if isOriginalSelected}
+						<div class="ml-3 bg-sixt-orange text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
+							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+					{/if}
+				</button>
+			</div>
+		{/if}
+
+		<!-- Recommended vehicle (large card) -->
+		{#if data.vehicles.length > 1}
+			{@const recommendedDeal = data.vehicles[1]}
+			{@const recommendedVehicle = recommendedDeal.vehicle}
+			{@const isRecommendedSelected = selectedVehicleId === recommendedVehicle.id}
+			{@const cardAttrs = getCardAttributes(recommendedVehicle)}
+			
+			<div class="mb-12 text-center">
+				<button
+					onclick={() => handleSelectVehicle(recommendedVehicle.id)}
+					class="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-200 overflow-hidden {isRecommendedSelected
+						? 'ring-4 ring-sixt-orange'
+						: 'border-2 border-gray-200'}"
+				>
+					<!-- Large vehicle image -->
+					<div
+						class="relative w-full bg-white flex items-center justify-center px-24 py-8"
+					>
+						<div class="w-full" style="aspect-ratio: 16/9;">
+							<img
+								src={getMainImage(recommendedVehicle)}
+								alt="{recommendedVehicle.brand} {recommendedVehicle.model}"
+								class="w-full h-full object-contain"
+							/>
+						</div>
+
+						<!-- Recommended badge -->
+						<div class="absolute top-4 left-4 bg-sixt-orange text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg">
+							⭐ Recommended Upgrade
+						</div>
 
 						<!-- Selection indicator -->
-						{#if isSelected}
+						{#if isRecommendedSelected}
 							<div class="absolute inset-0 bg-sixt-orange/10 flex items-center justify-center">
-								<div
-									class="bg-sixt-orange text-white rounded-full w-12 h-12 flex items-center justify-center"
-								>
-									<svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+								<div class="bg-sixt-orange text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
+									<svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
 										<path
 											fill-rule="evenodd"
 											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -167,25 +211,22 @@
 					</div>
 
 					<!-- Vehicle info section -->
-					<div class="p-4 flex flex-col flex-grow">
+					<div class="p-6">
 						<!-- Brand & Model -->
-						<h3 class="text-base font-bold text-gray-900 text-center">
-							{vehicle.brand}
-							{vehicle.model}
+						<h3 class="text-2xl font-bold text-gray-900 text-center mb-1">
+							{recommendedVehicle.brand} {recommendedVehicle.model}
 						</h3>
-						<p class="text-xs text-gray-500 text-center mb-3">{vehicle.groupType}</p>
+						<p class="text-base text-gray-500 text-center mb-4">{recommendedVehicle.groupType}</p>
 
 						<!-- Attributes grid -->
 						{#if cardAttrs.length > 0}
-							<div
-								class="flex justify-center items-center gap-4 mb-4 py-2 border-y border-gray-100"
-							>
+							<div class="flex justify-center items-center gap-6 mb-4 py-3 border-y border-gray-200">
 								{#each cardAttrs as attr}
 									<div class="flex flex-col items-center text-center">
 										{#if attr.iconUrl}
-											<img src={attr.iconUrl} alt={attr.title} class="w-5 h-5 mb-1" />
+											<img src={attr.iconUrl} alt={attr.title} class="w-6 h-6 mb-1" />
 										{/if}
-										<div class="text-xs font-semibold text-gray-900">{attr.value}</div>
+										<div class="text-sm font-semibold text-gray-900">{attr.value}</div>
 										{#if attr.title}
 											<div class="text-xs text-gray-500">{attr.title}</div>
 										{/if}
@@ -195,30 +236,55 @@
 						{/if}
 
 						<!-- Pricing section -->
-						<div class="mt-auto text-center">
-							{#if deal.pricing.discountPercentage > 0 && deal.pricing.listPrice !== undefined}
-								<div class="text-xs text-gray-500 line-through mb-1">
-									{formatPrice(deal.pricing.listPrice)}
-									{deal.pricing.listPrice?.suffix}
+						<div class="text-center">
+							{#if recommendedDeal.pricing.discountPercentage > 0 && recommendedDeal.pricing.listPrice !== undefined}
+								<div class="text-base text-gray-500 line-through mb-1">
+									{formatPrice(recommendedDeal.pricing.listPrice)}
+									{recommendedDeal.pricing.listPrice?.suffix}
 								</div>
 							{/if}
-							{#if deal.pricing.totalPrice.amount === 0}
-								<div class="text-md text-gray-600 mb-5">included</div>
+							{#if recommendedDeal.pricing.totalPrice.amount === 0}
+								<div class="text-xl text-gray-600 font-semibold">included</div>
 							{:else}
-								<div class="font-bold text-lg text-sixt-orange">
-									<span>{formatPrice(deal.pricing.displayPrice)}</span>
-									<span class="text-xs font-normal">{deal.pricing.displayPrice.suffix}</span>
+								<div class="font-bold text-3xl text-sixt-orange mb-1">
+									<span>{formatPrice(recommendedDeal.pricing.displayPrice)}</span>
+									<span class="text-lg font-normal">{recommendedDeal.pricing.displayPrice.suffix}</span>
 								</div>
-								<div class="text-xs text-gray-600 mt-1">
-									{formatPrice(deal.pricing.totalPrice)}
-									{deal.pricing.totalPrice.suffix}
+								<div class="text-sm text-gray-600">
+									{formatPrice(recommendedDeal.pricing.totalPrice)}
+									{recommendedDeal.pricing.totalPrice.suffix}
 								</div>
 							{/if}
 						</div>
+
+						<!-- Why this car - bullet points -->
+						<div class="mt-6 pt-6 border-t border-gray-200">
+							<h4 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why This Car?</h4>
+							<div class="space-y-3 text-left max-w-lg mx-auto">
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-green-700 font-medium">Spacious interior - perfect for families with 5+ passengers</p>
+								</div>
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-green-700 font-medium">Large trunk space for all your luggage and equipment</p>
+								</div>
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-green-700 font-medium">Premium comfort features for long-distance travel</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</button>
-			{/each}
-		</div>
+			</div>
+		{/if}
 
 		<!-- Confirm button -->
 		<div class="flex justify-center gap-4">
@@ -238,4 +304,15 @@
 			</button>
 		</div>
 	</main>
+	
+	<!-- Avatar positioned at bottom right -->
+	<div class="fixed bottom-8 right-8 scale-150">
+		<SpeakingAvatar
+			text="We found the perfect car for you! We recommend this vehicle because it has a spacious interior perfect for families with 5 or more passengers, large trunk space for all your luggage and equipment, and premium comfort features for long-distance travel."
+			idleImageUrl="/avatar-closed.png"
+			speakingImageUrl="/avatar-open.png"
+			useElevenLabs={true}
+			autoSpeak={true}
+		/>
+	</div>
 </div>
