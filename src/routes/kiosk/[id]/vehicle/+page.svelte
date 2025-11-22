@@ -14,6 +14,13 @@
 	let selectedVehicleId: string | null = $state(null);
 	let isLoading = $state(false);
 
+	// Determine avatar variant based on selected vehicle
+	const avatarVariant = $derived<'premium' | 'minimal'>(
+		data.vehicles.length > 1 && selectedVehicleId === data.vehicles[1].vehicle.id
+			? 'premium'
+			: 'minimal'
+	);
+
 	onMount(() => {
 		// Pre-select the recommended vehicle (second one) if available
 		if (recommendedDeal === undefined) goto(`/kiosk/${encodeURIComponent(bookingId)}`);
@@ -318,8 +325,7 @@
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar
 			text="We found the perfect car for you! We recommend this vehicle because it has a spacious interior perfect for families with 5 or more passengers, large trunk space for all your luggage and equipment, and premium comfort features for long-distance travel."
-			idleImageUrl="/avatar-closed.png"
-			speakingImageUrl="/avatar-open.png"
+			variant={avatarVariant}
 			useElevenLabs={true}
 			autoSpeak={true}
 		/>

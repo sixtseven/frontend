@@ -3,14 +3,18 @@
 	import { browser } from '$app/environment';
 
 	export let text: string = '';
-	export let idleImageUrl: string = '/avatar-closed.png';
-	export let speakingImageUrl: string = '/avatar-open.png';
 	export let autoSpeak: boolean = false;
 	export let useElevenLabs: boolean = false;
 	export let onSpeechEnd: (() => void) | undefined = undefined;
+	export let variant: 'premium' | 'minimal' = 'minimal';
+
+	// Set image URLs based on variant (reactive)
+	$: idleImageUrl = `/avatar-closed-${variant}.png`;
+	$: speakingImageUrl = `/avatar-open-${variant}.png`;
 
 	let isSpeaking = false;
 	let isLoading = false;
+	$: if (!isSpeaking) currentImage = idleImageUrl;
 	let currentImage = idleImageUrl;
 	let mouthAnimationInterval: number | null = null;
 	let audioElement: HTMLAudioElement | null = null;

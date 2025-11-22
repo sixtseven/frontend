@@ -43,8 +43,7 @@
 		<div class="mb-8">
 			<SpeakingAvatar
 				text="Welcome to Sixt! Please scan your booking QR code to get started."
-				idleImageUrl="/avatar-closed.png"
-				speakingImageUrl="/avatar-open.png"
+				variant="minimal"
 				useElevenLabs={true}
 				autoSpeak={true}
 			/>
