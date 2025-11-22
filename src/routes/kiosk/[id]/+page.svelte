@@ -19,9 +19,13 @@
 	let redirectPath: string | undefined = $state(undefined);
 
 	if (browser) {
-		data.booking.then((booking) => {
-			redirectPath = booking.redirectPath;
-		});
+		data.booking
+			.then((booking) => {
+				redirectPath = booking.redirectPath;
+			})
+			.catch(() => {
+				goto('/kiosk?error=notfound');
+			});
 	}
 
 	function handleSpeechEnd() {
@@ -31,35 +35,37 @@
 	}
 </script>
 
-<div class="flex-grow  bg-white flex items-center justify-center">
+<div class="flex-grow bg-white flex items-center justify-center">
 	<div class="w-full h-full flex items-center justify-center">
 		{#await data.booking}
 			<div class="flex flex-col items-center gap-8">
 				<div style="transform: scale(3);">
-				<SpeakingAvatar
-					text="Welcome! Let me load your booking information."
-					idleImageUrl="/avatar-closed.png"
-					speakingImageUrl="/avatar-open.png"
-					useElevenLabs={true}
-					autoSpeak={false}
-				/>
+					<SpeakingAvatar
+						text="Welcome! Let me load your booking information."
+						idleImageUrl="/avatar-closed.png"
+						speakingImageUrl="/avatar-open.png"
+						useElevenLabs={true}
+						autoSpeak={false}
+					/>
 				</div>
-				
+
 				<div class="mt-16">
-					<div class="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto"></div>
+					<div
+						class="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-500 mx-auto"
+					></div>
 				</div>
 			</div>
 		{:then booking}
 			<div class="flex flex-col items-center justify-center">
 				<div style="transform: scale(3);">
-				<SpeakingAvatar
-					text="Welcome! Let me load your booking information."
-					idleImageUrl="/avatar-closed.png"
-					speakingImageUrl="/avatar-open.png"
-					useElevenLabs={true}
-					autoSpeak={true}
-					onSpeechEnd={handleSpeechEnd}
-				/>
+					<SpeakingAvatar
+						text="Welcome! Let me load your booking information."
+						idleImageUrl="/avatar-closed.png"
+						speakingImageUrl="/avatar-open.png"
+						useElevenLabs={true}
+						autoSpeak={true}
+						onSpeechEnd={handleSpeechEnd}
+					/>
 				</div>
 			</div>
 		{/await}

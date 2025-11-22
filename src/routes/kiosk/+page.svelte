@@ -3,6 +3,7 @@
 	import sixtIconWhite from '$lib/assets/sixt7-white.png';
 	import mascot from '$lib/assets/sixtseven.png';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
+	import { page } from '$app/stores';
 
 	let code: string = '';
 	let inputEl: HTMLInputElement | null = null;
@@ -16,13 +17,16 @@
 	function handleSubmit(e?: Event) {
 		e?.preventDefault();
 
-		const val = code?.trim();
+		let val = code?.trim();
 		if (!val) {
 			message = 'No code detected. Please scan your booking QR code.';
 			// re-focus so scanner input goes to the field
 			inputEl?.focus();
 			return;
 		}
+
+		// Check if the code is the full url
+		if (val.includes('/booking/')) val = val.split('/booking/')[1];
 
 		// Navigate to the booking page for the scanned ID
 		// encodeURIComponent to be safe for any scanner output
@@ -50,6 +54,74 @@
 		<p class="text-lg text-gray-300 mb-8">
 			Use the on-screen field below. A USB scanner will input the booking ID automatically.
 		</p>
+
+		{#if $page.url.searchParams.has('error')}
+			<div
+				role="alert"
+				class="w-full max-w-3xl mb-6 p-4 rounded-md bg-red-600 text-white flex items-start gap-4 shadow"
+			>
+				<!-- Icon -->
+				<svg
+					class="w-6 h-6 flex-shrink-0"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					aria-hidden="true"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 8v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z"
+					/>
+				</svg>
+
+				<div class="flex-1 text-left">
+					<div class="font-semibold">Error</div>
+					<div class="text-sm mt-1">
+						{$page.url.searchParams.get('error') ?? 'An unknown error occurred.'}
+						{#if $page.url.searchParams.get('error_description')}
+							<span class="block text-gray-100/90 mt-1"
+								>{$page.url.searchParams.get('error_description')}</span
+							>
+						{/if}
+					</div>
+				</div>
+
+				<button
+					type="button"
+					aria-label="Dismiss error"
+					class="ml-4 px-2 py-1 rounded bg-red-700/80 hover:bg-red-700"
+					on:click={() => {
+						const u = new URL(window.location.href);
+						u.searchParams.delete('error');
+						u.searchParams.delete('error_description');
+						history.replaceState({}, '', u.toString());
+						message = null;
+						inputEl?.focus();
+					}}
+				>
+					<span class="sr-only">Dismiss</span>
+					<!-- simple X -->
+					<svg
+						class="w-4 h-4"
+						xmlns="http://www.w3.org/2000/svg"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+		{/if}
 
 		<form on:submit|preventDefault={handleSubmit} class="flex flex-col items-center gap-4">
 			<input

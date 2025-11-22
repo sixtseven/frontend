@@ -11,6 +11,9 @@ export const load: PageServerLoad = async ({ params }) => {
     const bookingId = params.id;
 
     const booking: Promise<{ booking: BookingResponse, redirectPath: string | undefined }> = fetch(`https://hackatum25.sixt.io/api/booking/${encodeURIComponent(bookingId)}`).then(async (response) => {
+        if (!response.ok)
+            throw error(response.status, response.statusText)
+
         const booking = await response.json();
 
         // Redirect based on booking status
