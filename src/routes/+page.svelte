@@ -1,4 +1,5 @@
 <script lang="ts">
+	import sixtIcon from '$lib/assets/sixt.svg';
 </script>
 
 <div class="min-h-screen bg-white font-sixt flex flex-col items-center justify-start">
@@ -6,7 +7,7 @@
 	<div class="w-full max-w-4xl flex items-center justify-center gap-20 px-6 py-6">
 		<img src="/hackatum.png" alt="Hackatum" class=" h-40 w-auto object-contain" />
 		<div class="text-gray-400 text-8xl">//</div>
-		<img src="/sixt.svg" alt="SIXT" class=" h-32 w-auto object-contain" />
+		<img src={sixtIcon} alt="SIXT" class=" h-32 w-auto object-contain" />
 	</div>
 
 	<!-- Short description -->
