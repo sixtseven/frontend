@@ -108,6 +108,15 @@
 					</div>
 				</div>
 
+				<!-- Warning for 0-star protection -->
+				{#if pkg.ratingStars === 0}
+					<div class="mb-4 p-3 bg-sixt-danger/10 border border-sixt-danger/30 rounded-lg">
+						<p class="text-sm font-semibold text-sixt-danger">
+							⚠️ This protection package does <strong>NOT</strong> offer any protection.
+						</p>
+					</div>
+				{/if}
+
 				<!-- Description -->
 				{#if pkg.description}
 					<p class="text-sm text-gray-600 mb-4">{pkg.description}</p>
@@ -120,10 +129,28 @@
 						<ul class="space-y-2">
 							{#each pkg.includes as coverage}
 								<li class="flex items-start gap-2 text-sm text-gray-700">
-									<span class="text-sixt-orange font-bold mt-0.5">✓</span>
+									<span class="text-sixt-success font-bold mt-0.5">✓</span>
 									<div>
-										<div class="font-medium">{coverage.title}</div>
-										<div class="text-xs text-gray-600">{coverage.description}</div>
+										<div class="flex items-center gap-1 font-medium">
+											{coverage.title}
+											{#if coverage.description}
+												<div class="relative group inline-block">
+													<div
+														class="text-gray-400 group-hover:text-gray-600 transition inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-400 text-xs font-bold cursor-help"
+													>
+														?
+													</div>
+													<div
+														class="invisible group-hover:visible absolute z-10 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 whitespace-normal w-40 bottom-full left-1/2 transform -translate-x-1/2 mb-2 pointer-events-none group-hover:pointer-events-auto"
+													>
+														{coverage.description}
+														<div
+															class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"
+														></div>
+													</div>
+												</div>
+											{/if}
+										</div>
 									</div>
 								</li>
 							{/each}
@@ -138,7 +165,7 @@
 						<ul class="space-y-1">
 							{#each pkg.excludes as coverage}
 								<li class="flex items-start gap-2 text-xs text-gray-600">
-									<span class="text-gray-400 mt-0.5">–</span>
+									<span class="text-sixt-danger font-bold mt-0.5">!</span>
 									<span>{coverage.title}</span>
 								</li>
 							{/each}
