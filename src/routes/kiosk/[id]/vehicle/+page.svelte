@@ -322,7 +322,7 @@
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar
-			text="We found the perfect car for you! We recommend this vehicle because it has a spacious interior perfect for families with 5 or more passengers, large trunk space for all your luggage and equipment, and premium comfort features for long-distance travel."
+			text={recommendations?.upsell_summary}
 			variant={avatarVariant}
 			useElevenLabs={true}
 			autoSpeak={true}
