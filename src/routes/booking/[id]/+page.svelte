@@ -45,12 +45,7 @@
 	<!-- Header with SIXT logo -->
 	<header class="bg-white border-b border-gray-200">
 		<div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-			<img
-				src="/sixt.svg"
-				alt="SIXT"
-				class="h-8 w-auto"
-				style="filter: brightness(0) saturate(100%) invert(37%) sepia(89%) saturate(1500%) hue-rotate(5deg);"
-			/>
+			<img src="/sixt.svg" alt="SIXT" class="h-8 w-auto" />
 			<div class="text-sm text-gray-600 uppercase tracking-widest font-semibold">
 				Key Vending System
 			</div>
