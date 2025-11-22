@@ -170,35 +170,103 @@
 			{@const isRecommendedSelected = selectedVehicleId === recommendedVehicle.id}
 			{@const cardAttrs = getCardAttributes(recommendedVehicle)}
 			
-			<div class="mb-12 text-center">
+			<div class="mb-12 flex justify-center">
 				<button
 					onclick={() => handleSelectVehicle(recommendedVehicle.id)}
-					class="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-200 overflow-hidden {isRecommendedSelected
+					class="w-full max-w-3xl bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden relative {isRecommendedSelected
 						? 'ring-4 ring-sixt-orange'
 						: 'border-2 border-gray-200'}"
 				>
-					<!-- Large vehicle image -->
-					<div
-						class="relative w-full bg-white flex items-center justify-center px-24 py-8"
-					>
-						<div class="w-full" style="aspect-ratio: 16/9;">
-							<img
-								src={getMainImage(recommendedVehicle)}
-								alt="{recommendedVehicle.brand} {recommendedVehicle.model}"
-								class="w-full h-full object-contain"
-							/>
+					<!-- Recommended badge (top left of card) -->
+					<div class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10">
+						⭐ Recommended Upgrade
+					</div>
+
+					<!-- Horizontal layout: image left, content right, tick bottom right -->
+					<div class="flex items-center">
+						<!-- Vehicle image section (left side) -->
+						<div class="w-1/2 bg-white flex items-center justify-center py-8">
+							<div class="w-full">
+								<img
+									src={getMainImage(recommendedVehicle)}
+									alt="{recommendedVehicle.brand} {recommendedVehicle.model}"
+									class="w-full h-full object-contain"
+								/>
+							</div>
 						</div>
 
-						<!-- Recommended badge -->
-						<div class="absolute top-4 left-4 bg-sixt-orange text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg">
-							⭐ Recommended Upgrade
+						<!-- Vehicle info section (right side) -->
+						<div class="w-1/2 p-8 text-left">
+							<!-- Brand & Model -->
+							<h3 class="text-2xl font-bold text-gray-900 mb-2">
+								{recommendedVehicle.brand} {recommendedVehicle.model}
+							</h3>
+							<p class="text-base text-gray-500 mb-4">{recommendedVehicle.groupType}</p>
+
+							<!-- Attributes grid -->
+							{#if cardAttrs.length > 0}
+								<div class="flex items-center gap-4 mb-3">
+									{#each cardAttrs as attr}
+										<div class="flex items-center gap-1">
+											{#if attr.iconUrl}
+												<img src={attr.iconUrl} alt={attr.title} class="w-4 h-4" />
+											{/if}
+											<div class="text-xs font-semibold text-gray-900">{attr.value}</div>
+										</div>
+									{/each}
+								</div>
+							{/if}
+
+							<!-- Pricing section -->
+							<div class="mb-3">
+								{#if recommendedDeal.pricing.discountPercentage > 0 && recommendedDeal.pricing.listPrice !== undefined}
+									<div class="text-sm text-gray-500 line-through mb-1">
+										{formatPrice(recommendedDeal.pricing.listPrice)}
+										{recommendedDeal.pricing.listPrice?.suffix}
+									</div>
+								{/if}
+								{#if recommendedDeal.pricing.totalPrice.amount === 0}
+									<div class="text-lg text-gray-600 font-semibold">included</div>
+								{:else}
+									<div class="font-bold text-2xl text-sixt-orange mb-1">
+										<span>{formatPrice(recommendedDeal.pricing.displayPrice)}</span>
+										<span class="text-base font-normal">{recommendedDeal.pricing.displayPrice.suffix}</span>
+									</div>
+									<div class="text-xs text-gray-600">
+										{formatPrice(recommendedDeal.pricing.totalPrice)}
+										{recommendedDeal.pricing.totalPrice.suffix}
+									</div>
+								{/if}
+							</div>
+
+							<!-- Why this car - bullet points (compact) -->
+							<div class="space-y-3">
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-base text-green-700 font-semibold">Spacious interior - perfect for families</p>
+								</div>
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-base text-green-700 font-semibold">Large trunk space for luggage</p>
+								</div>
+								<div class="flex items-start gap-3">
+									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+									</svg>
+									<p class="text-base text-green-700 font-semibold">Premium comfort features</p>
+								</div>
+							</div>
 						</div>
 
-						<!-- Selection indicator -->
-						{#if isRecommendedSelected}
-							<div class="absolute inset-0 bg-sixt-orange/10 flex items-center justify-center">
-								<div class="bg-sixt-orange text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
-									<svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+						<!-- Selection indicator (always reserves space) -->
+						<div class="ml-3 mr-3 w-10 h-10 flex items-center justify-center flex-shrink-0">
+							{#if isRecommendedSelected}
+								<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+									<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
 										<path
 											fill-rule="evenodd"
 											d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -206,80 +274,7 @@
 										/>
 									</svg>
 								</div>
-							</div>
-						{/if}
-					</div>
-
-					<!-- Vehicle info section -->
-					<div class="p-6">
-						<!-- Brand & Model -->
-						<h3 class="text-2xl font-bold text-gray-900 text-center mb-1">
-							{recommendedVehicle.brand} {recommendedVehicle.model}
-						</h3>
-						<p class="text-base text-gray-500 text-center mb-4">{recommendedVehicle.groupType}</p>
-
-						<!-- Attributes grid -->
-						{#if cardAttrs.length > 0}
-							<div class="flex justify-center items-center gap-6 mb-4 py-3 border-y border-gray-200">
-								{#each cardAttrs as attr}
-									<div class="flex flex-col items-center text-center">
-										{#if attr.iconUrl}
-											<img src={attr.iconUrl} alt={attr.title} class="w-6 h-6 mb-1" />
-										{/if}
-										<div class="text-sm font-semibold text-gray-900">{attr.value}</div>
-										{#if attr.title}
-											<div class="text-xs text-gray-500">{attr.title}</div>
-										{/if}
-									</div>
-								{/each}
-							</div>
-						{/if}
-
-						<!-- Pricing section -->
-						<div class="text-center">
-							{#if recommendedDeal.pricing.discountPercentage > 0 && recommendedDeal.pricing.listPrice !== undefined}
-								<div class="text-base text-gray-500 line-through mb-1">
-									{formatPrice(recommendedDeal.pricing.listPrice)}
-									{recommendedDeal.pricing.listPrice?.suffix}
-								</div>
 							{/if}
-							{#if recommendedDeal.pricing.totalPrice.amount === 0}
-								<div class="text-xl text-gray-600 font-semibold">included</div>
-							{:else}
-								<div class="font-bold text-3xl text-sixt-orange mb-1">
-									<span>{formatPrice(recommendedDeal.pricing.displayPrice)}</span>
-									<span class="text-lg font-normal">{recommendedDeal.pricing.displayPrice.suffix}</span>
-								</div>
-								<div class="text-sm text-gray-600">
-									{formatPrice(recommendedDeal.pricing.totalPrice)}
-									{recommendedDeal.pricing.totalPrice.suffix}
-								</div>
-							{/if}
-						</div>
-
-						<!-- Why this car - bullet points -->
-						<div class="mt-6 pt-6 border-t border-gray-200">
-							<h4 class="text-lg font-semibold text-gray-900 mb-4 text-center">Why This Car?</h4>
-							<div class="space-y-3 text-left max-w-lg mx-auto">
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-green-700 font-medium">Spacious interior - perfect for families with 5+ passengers</p>
-								</div>
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-green-700 font-medium">Large trunk space for all your luggage and equipment</p>
-								</div>
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-green-700 font-medium">Premium comfort features for long-distance travel</p>
-								</div>
-							</div>
 						</div>
 					</div>
 				</button>
