@@ -5,9 +5,6 @@ export const POST: RequestHandler = async ({ params, request }) => {
     const { id, vehicleId } = params;
 
     try {
-        // Parse the request body
-        const body = await request.json();
-
         // Proxy POST request to external API
         const response = await fetch(
             `https://hackatum25.sixt.io/api/booking/${encodeURIComponent(id)}/vehicles/${encodeURIComponent(vehicleId)}`,
@@ -15,8 +12,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
+                }
             }
         );
 

@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import QRCode from 'qrcode';
+	import { goto } from '$app/navigation';
 
 	let qrCode: string | null = null;
 	let bookingId: string = '';
@@ -34,7 +35,7 @@
 	}
 
 	function goBack() {
-		window.location.href = '/booking';
+		goto('/booking');
 	}
 </script>
 

@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
         return { booking, redirectPath }
     });
 
-    const recommendation: Promise<Recommendations> = fetch("http://127.0.0.1:9000/api/booking/Q80chI4GLq4d4D3UR9p5/recommend").then((response) => response.json())
+    const recommendation: Promise<Recommendations> = fetch(`http://127.0.0.1:9000/api/booking/${encodeURIComponent(bookingId)}/recommend`).then((response) => response.json())
 
     return { bookingId, booking, recommendation }
 

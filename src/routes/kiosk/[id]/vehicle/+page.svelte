@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { PageData } from './$types';
-	import type { Deal, Vehicle } from './+page.server';
+	import type { PageData, PageProps } from './$types';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
-	import { recommendationsStore } from '$lib/stores';
+	import { recommendationsStore, type Vehicle } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
-	let { bookingId }: PageData = $props();
+	let { params }: PageProps = $props();
+	const bookingId = params.id;
 	let recommendations = $derived($recommendationsStore);
 	let originalDeal = $derived(recommendations?.base_car.raw);
 	let recommendedDeal = $derived(recommendations?.upsell_car.raw);
@@ -16,9 +16,7 @@
 
 	// Determine avatar variant based on selected vehicle
 	const avatarVariant = $derived<'premium' | 'minimal'>(
-		data.vehicles.length > 1 && selectedVehicleId === data.vehicles[1].vehicle.id
-			? 'premium'
-			: 'minimal'
+		selectedVehicleId === recommendedDeal?.vehicle.id ? 'premium' : 'minimal'
 	);
 
 	onMount(() => {
@@ -85,7 +83,7 @@
 			}
 
 			// Navigate to next step
-			window.location.href = `/kiosk/${encodeURIComponent(bookingId)}/protections`;
+			goto(`/kiosk/${encodeURIComponent(bookingId)}/protections`);
 		} catch (err) {
 			console.error('Error confirming vehicle:', err);
 			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -98,7 +96,7 @@
 <div class="flex-grow bg-white flex flex-col relative">
 	<!-- Main content -->
 	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
-		<div class="mb-12 flex items-start justify-between gap-8">
+		<div class="mb-6 flex items-start justify-between gap-8">
 			<div class="flex-grow">
 				<h1 class="text-4xl font-bold text-gray-900 mb-2">Your Vehicle Selection</h1>
 				<p class="text-lg text-gray-600">We have a special recommendation for you</p>
@@ -111,7 +109,7 @@
 			{@const isRecommendedSelected = selectedVehicleId === recommendedVehicle.id}
 			{@const cardAttrs = getCardAttributes(recommendedVehicle)}
 
-			<div class="mb-12 flex justify-center">
+			<div class="mb-6 flex justify-center">
 				<button
 					onclick={() => handleSelectVehicle(recommendedVehicle.id)}
 					class="w-full max-w-3xl bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden relative {isRecommendedSelected
@@ -230,7 +228,7 @@
 		{/if}
 
 		<!-- OR Divider -->
-		<div class="flex items-center gap-4 mb-12 max-w-3xl mx-auto">
+		<div class="flex items-center gap-4 mb-6 max-w-3xl mx-auto">
 			<div class="flex-grow border-t border-gray-300"></div>
 			<span class="text-gray-500 font-semibold text-lg px-4">OR</span>
 			<div class="flex-grow border-t border-gray-300"></div>
@@ -241,7 +239,7 @@
 			{@const originalVehicle = originalDeal.vehicle}
 			{@const isOriginalSelected = selectedVehicleId === originalVehicle.id}
 
-			<div class="mb-8">
+			<div class="mb-6">
 				<button
 					onclick={() => handleSelectVehicle(originalVehicle.id)}
 					class="w-full max-w-3xl mx-auto flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
