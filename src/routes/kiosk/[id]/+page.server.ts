@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params }) => {
         const statusPathMap: Record<string, string> = {
             booking: `/kiosk/${bookingId}/vehicle`,
             vehicleSelected: `/kiosk/${bookingId}/protections`,
-            rent: `/kiosk/${bookingId}/rent`,
+            rent: `/kiosk/${bookingId}/addons`,
             completed: `/kiosk/${bookingId}/completed`
             // Add more status mappings as needed
         };

@@ -1,0 +1,1 @@
+- unify protections and vehicle price string generation
