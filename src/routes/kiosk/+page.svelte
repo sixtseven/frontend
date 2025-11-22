@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import sixtIconWhite from '$lib/assets/sixt7-white.png';
 	import mascot from '$lib/assets/sixtseven.png';
+	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 
 	let code: string = '';
 	let inputEl: HTMLInputElement | null = null;
@@ -35,7 +36,15 @@
 	<div class="max-w-3xl w-full text-center text-white flex flex-col items-center">
 		<img src={sixtIconWhite} alt="SIXT" class="h-10 mb-8 w-auto" />
 
-		<img src={mascot} alt="SixtSeven mascot" class="w-40 mb-10 h-auto object-contain" />
+		<div class="mb-8">
+			<SpeakingAvatar
+				text="Welcome to Sixt! Please scan your booking QR code to get started."
+				idleImageUrl="/avatar-closed.png"
+				speakingImageUrl="/avatar-open.png"
+				useElevenLabs={true}
+				autoSpeak={true}
+			/>
+		</div>
 
 		<h1 class="text-4xl md:text-5xl font-bold mb-4">Scan your booking QR code</h1>
 		<p class="text-lg text-gray-300 mb-8">

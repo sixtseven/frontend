@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import type { Deal, Vehicle } from './+page.server';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
+	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -88,14 +89,27 @@
 	}
 </script>
 
-<div class="min-h-screen bg-white flex flex-col">
+<div class="flex-grow bg-white flex flex-col">
 	<!-- Main content -->
 	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12">
-		<div class="mb-8">
-			<h1 class="text-4xl font-bold text-gray-900 mb-2">Select Your Vehicle</h1>
-			<p class="text-lg text-gray-600">
-				Choose from {data.totalVehicles} available vehicles
-			</p>
+		<div class="mb-8 flex items-start gap-8">
+			<div class="flex-grow">
+				<h1 class="text-4xl font-bold text-gray-900 mb-2">Select Your Vehicle</h1>
+				<p class="text-lg text-gray-600">
+					Choose from {data.totalVehicles} available vehicles
+				</p>
+			</div>
+			
+			<!-- Avatar section -->
+			<div class="flex-shrink-0">
+				<SpeakingAvatar
+					text="Please select your preferred vehicle from the available options."
+					idleImageUrl="/avatar-closed.png"
+					speakingImageUrl="/avatar-open.png"
+					useElevenLabs={true}
+					autoSpeak={true}
+				/>
+			</div>
 		</div>
 
 		<!-- Vehicle grid -->

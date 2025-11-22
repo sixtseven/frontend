@@ -3,7 +3,7 @@
 	import mascot from '$lib/assets/sixtseven.png';
 </script>
 
-<div class="min-h-screen bg-white font-sixt flex flex-col items-center justify-start">
+<div class="flex-grow bg-white font-sixt flex flex-col items-center justify-start">
 	<!-- Mascot -->
 	<div class="mt-12 flex items-center justify-center">
 		<img src={mascot} alt="SixtSeven mascot" class="w-56 h-auto object-contain" />
