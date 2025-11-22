@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import type { PageProps } from './$types';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
+	import { recommendationsStore } from '$lib/stores';
 
 	let { data }: PageProps = $props();
 
@@ -25,6 +26,13 @@
 			})
 			.catch(() => {
 				goto('/kiosk?error=notfound');
+			});
+
+		data.recommendation
+			.then((recommendation) => recommendationsStore.set(recommendation))
+			.catch((e) => {
+				console.error(e);
+				recommendationsStore.set(undefined);
 			});
 	}
 
