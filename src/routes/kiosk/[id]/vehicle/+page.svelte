@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { PageData } from './$types';
-	import type { Deal, Vehicle } from './+page.server';
+	import type { PageData, PageProps } from './$types';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
+	import { recommendationsStore, type Vehicle } from '$lib/stores';
+	import { goto } from '$app/navigation';
 
-	let { data }: { data: PageData } = $props();
-
+	let { params }: PageProps = $props();
+	const bookingId = params.id;
+	let recommendations = $derived($recommendationsStore);
+	let originalDeal = $derived(recommendations?.base_car.raw);
+	let recommendedDeal = $derived(recommendations?.upsell_car.raw);
 	let selectedVehicleId: string | null = $state(null);
 	let isLoading = $state(false);
 
@@ -19,11 +23,8 @@
 
 	onMount(() => {
 		// Pre-select the recommended vehicle (second one) if available
-		if (data.vehicles.length > 1) {
-			selectedVehicleId = data.vehicles[1].vehicle.id;
-		} else if (data.vehicles.length > 0) {
-			selectedVehicleId = data.vehicles[0].vehicle.id;
-		}
+		if (recommendedDeal === undefined) goto(`/kiosk/${encodeURIComponent(bookingId)}`);
+		else selectedVehicleId = recommendedDeal.vehicle.id;
 	});
 
 	function formatUnit(unit?: string): string {
@@ -70,16 +71,12 @@
 		try {
 			// POST to local API endpoint which proxies to external API
 			const response = await fetch(
-				`/api/booking/${encodeURIComponent(data.bookingId)}/vehicle/${encodeURIComponent(selectedVehicleId)}`,
+				`/api/booking/${encodeURIComponent(bookingId)}/vehicle/${encodeURIComponent(selectedVehicleId)}`,
 				{
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						vehicleId: selectedVehicleId,
-						reservationId: data.reservationId
-					})
+					}
 				}
 			);
 
@@ -88,7 +85,7 @@
 			}
 
 			// Navigate to next step
-			window.location.href = `/kiosk/${encodeURIComponent(data.bookingId)}/protections`;
+			goto(`/kiosk/${encodeURIComponent(bookingId)}/protections`);
 		} catch (err) {
 			console.error('Error confirming vehicle:', err);
 			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -101,12 +98,10 @@
 <div class="flex-grow bg-white flex flex-col relative">
 	<!-- Main content -->
 	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
-		<div class="mb-12 flex items-start justify-between gap-8">
+		<div class="mb-6 flex items-start justify-between gap-8">
 			<div class="flex-grow">
 				<h1 class="text-4xl font-bold text-gray-900 mb-2">Your Vehicle Selection</h1>
-				<p class="text-lg text-gray-600">
-					We have a special recommendation for you
-				</p>
+				<p class="text-lg text-gray-600">We have a special recommendation for you</p>
 			</div>
 		</div>
 
@@ -171,13 +166,12 @@
 		{/if}
 
 		<!-- Recommended vehicle (large card) -->
-		{#if data.vehicles.length > 1}
-			{@const recommendedDeal = data.vehicles[1]}
+		{#if recommendedDeal !== undefined}
 			{@const recommendedVehicle = recommendedDeal.vehicle}
 			{@const isRecommendedSelected = selectedVehicleId === recommendedVehicle.id}
 			{@const cardAttrs = getCardAttributes(recommendedVehicle)}
-			
-			<div class="mb-12 flex justify-center">
+
+			<div class="mb-6 flex justify-center">
 				<button
 					onclick={() => handleSelectVehicle(recommendedVehicle.id)}
 					class="w-full max-w-3xl bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden relative {isRecommendedSelected
@@ -185,7 +179,9 @@
 						: 'border-2 border-gray-200'}"
 				>
 					<!-- Recommended badge (top left of card) -->
-					<div class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10">
+					<div
+						class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10"
+					>
 						⭐ Recommended Upgrade
 					</div>
 
@@ -206,7 +202,8 @@
 						<div class="w-1/2 p-8 text-left">
 							<!-- Brand & Model -->
 							<h3 class="text-2xl font-bold text-gray-900 mb-2">
-								{recommendedVehicle.brand} {recommendedVehicle.model}
+								{recommendedVehicle.brand}
+								{recommendedVehicle.model}
 							</h3>
 							<p class="text-base text-gray-500 mb-4">{recommendedVehicle.groupType}</p>
 
@@ -237,7 +234,9 @@
 								{:else}
 									<div class="font-bold text-2xl text-sixt-orange mb-1">
 										<span>{formatPrice(recommendedDeal.pricing.displayPrice)}</span>
-										<span class="text-base font-normal">{recommendedDeal.pricing.displayPrice.suffix}</span>
+										<span class="text-base font-normal"
+											>{recommendedDeal.pricing.displayPrice.suffix}</span
+										>
 									</div>
 									<div class="text-xs text-gray-600">
 										{formatPrice(recommendedDeal.pricing.totalPrice)}
@@ -248,31 +247,33 @@
 
 							<!-- Why this car - bullet points (compact) -->
 							<div class="space-y-3">
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-base text-green-700 font-semibold">Spacious interior - perfect for families</p>
-								</div>
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-base text-green-700 font-semibold">Large trunk space for luggage</p>
-								</div>
-								<div class="flex items-start gap-3">
-									<svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-									</svg>
-									<p class="text-base text-green-700 font-semibold">Premium comfort features</p>
-								</div>
+								{#each recommendations?.upsell_reasons as reason}
+									<div class="flex items-start gap-3">
+										<svg
+											class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+										<p class="text-base text-green-700 font-semibold">
+											{reason}
+										</p>
+									</div>
+								{/each}
 							</div>
 						</div>
 
 						<!-- Selection indicator (always reserves space) -->
 						<div class="ml-3 mr-3 w-10 h-10 flex items-center justify-center flex-shrink-0">
 							{#if isRecommendedSelected}
-								<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+								<div
+									class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center"
+								>
 									<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
 										<path
 											fill-rule="evenodd"
@@ -284,6 +285,79 @@
 							{/if}
 						</div>
 					</div>
+				</button>
+			</div>
+		{/if}
+
+		<!-- OR Divider -->
+		<div class="flex items-center gap-4 mb-6 max-w-3xl mx-auto">
+			<div class="flex-grow border-t border-gray-300"></div>
+			<span class="text-gray-500 font-semibold text-lg px-4">OR</span>
+			<div class="flex-grow border-t border-gray-300"></div>
+		</div>
+
+		<!-- Original booked vehicle (small card) -->
+		{#if originalDeal !== undefined}
+			{@const originalVehicle = originalDeal.vehicle}
+			{@const isOriginalSelected = selectedVehicleId === originalVehicle.id}
+
+			<div class="mb-6">
+				<button
+					onclick={() => handleSelectVehicle(originalVehicle.id)}
+					class="w-full max-w-3xl mx-auto flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
+						? 'ring-2 ring-sixt-orange'
+						: 'border border-gray-200'}"
+				>
+					<!-- Small vehicle image -->
+					<div
+						class="w-36 h-24 flex-shrink-0 bg-gradient-to-b from-gray-100 to-gray-50 rounded-lg flex items-center justify-center p-2 mr-3 relative"
+					>
+						<img
+							src={getMainImage(originalVehicle)}
+							alt="{originalVehicle.brand} {originalVehicle.model}"
+							class="max-w-full max-h-full object-contain"
+						/>
+
+						<!-- Your Original Booking badge -->
+						<div
+							class="absolute top-1 left-1 bg-gray-600 text-white px-2 py-1 rounded text-[11px] font-semibold shadow-md"
+						>
+							Your Original Booking
+						</div>
+					</div>
+
+					<!-- Vehicle info -->
+					<div class="flex-grow text-left">
+						<h3 class="text-base font-bold text-gray-900">
+							{originalVehicle.brand}
+							{originalVehicle.model}
+						</h3>
+						<p class="text-xs text-gray-500 mb-1">{originalVehicle.groupType}</p>
+
+						{#if originalDeal.pricing.totalPrice.amount === 0}
+							<p class="text-xs text-gray-600">included in your booking</p>
+						{:else}
+							<p class="font-semibold text-sm text-gray-900">
+								{formatPrice(originalDeal.pricing.displayPrice)}
+								<span class="text-xs font-normal">{originalDeal.pricing.displayPrice.suffix}</span>
+							</p>
+						{/if}
+					</div>
+
+					<!-- Selection indicator -->
+					{#if isOriginalSelected}
+						<div
+							class="ml-3 bg-sixt-orange text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0"
+						>
+							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</div>
+					{/if}
 				</button>
 			</div>
 		{/if}
@@ -306,7 +380,7 @@
 			</button>
 		</div>
 	</main>
-	
+
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar

@@ -1,5 +1,4 @@
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { writable } from "svelte/store";
 
 export interface VehicleAttribute {
     attributeType: string;
@@ -73,31 +72,10 @@ export interface VehiclesResponse {
     totalVehicles: number;
 }
 
-export const load: PageServerLoad = async ({ params }) => {
-    const bookingId = params.id;
+export interface Recommendations {
+    base_car: { raw: Deal }
+    upsell_car: { raw: Deal }
+    upsell_reasons: string[]
+}
 
-    try {
-        const response = await fetch(
-            `https://hackatum25.sixt.io/api/booking/${encodeURIComponent(bookingId)}/vehicles`
-        );
-
-        if (!response.ok) {
-            throw error(response.status, `Failed to fetch vehicles: ${response.statusText}`);
-        }
-
-        const data: VehiclesResponse = await response.json();
-
-        return {
-            bookingId,
-            vehicles: data.deals,
-            totalVehicles: data.totalVehicles,
-            reservationId: data.reservationId
-        };
-    } catch (err) {
-        if (err instanceof Object && 'status' in err) {
-            throw err;
-        }
-
-        throw error(500, `Failed to load vehicles: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    }
-};
+export const recommendationsStore = writable<Recommendations | undefined>(undefined);

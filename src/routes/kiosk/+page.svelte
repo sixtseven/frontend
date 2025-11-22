@@ -4,6 +4,7 @@
 	import mascot from '$lib/assets/sixtseven.png';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	let code: string = '';
 	let inputEl: HTMLInputElement | null = null;
@@ -30,7 +31,7 @@
 
 		// Navigate to the booking page for the scanned ID
 		// encodeURIComponent to be safe for any scanner output
-		window.location.href = `/kiosk/${encodeURIComponent(val)}`;
+		goto(`/kiosk/${encodeURIComponent(val)}`);
 	}
 </script>
 

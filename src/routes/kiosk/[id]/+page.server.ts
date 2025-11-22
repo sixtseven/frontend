@@ -1,5 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import type { Recommendations } from '$lib/stores';
 
 interface BookingResponse {
     id: string;
@@ -31,6 +32,8 @@ export const load: PageServerLoad = async ({ params }) => {
         return { booking, redirectPath }
     });
 
-    return { bookingId, booking }
+    const recommendation: Promise<Recommendations> = fetch(`http://127.0.0.1:9000/api/booking/${encodeURIComponent(bookingId)}/recommend`).then((response) => response.json())
+
+    return { bookingId, booking, recommendation }
 
 };

@@ -3,6 +3,7 @@
 	import type { ProtectionPackage } from './+page.server';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		data: {
@@ -81,7 +82,7 @@
 			}
 
 			// Navigate to next step (addons)
-			window.location.href = `/kiosk/${encodeURIComponent(data.bookingId)}/addons`;
+			goto(`/kiosk/${encodeURIComponent(data.bookingId)}/addons`);
 		} catch (err) {
 			console.error('Error confirming protection:', err);
 			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -103,9 +104,9 @@
 	</div>
 
 	<!-- Recommended protection (large card) - packages with 3+ stars or isNudge -->
-	{#each data.packages.filter(pkg => pkg.ratingStars > 2 || pkg.isNudge) as pkg (pkg.id)}
+	{#each data.packages.filter((pkg) => pkg.ratingStars > 2 || pkg.isNudge) as pkg (pkg.id)}
 		{@const isSelected = selectedProtectionId === pkg.id}
-		
+
 		<div class="mb-12 flex justify-center">
 			<button
 				onclick={() => (selectedProtectionId = pkg.id)}
@@ -114,7 +115,9 @@
 					: 'border-2 border-gray-200'}"
 			>
 				<!-- Recommended badge (top left of card) -->
-				<div class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10">
+				<div
+					class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10"
+				>
 					⭐ Recommended Protection
 				</div>
 
@@ -159,8 +162,16 @@
 							<div class="space-y-2.5">
 								{#each pkg.includes as coverage}
 									<div class="flex items-start gap-3">
-										<svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-											<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+										<svg
+											class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+												clip-rule="evenodd"
+											/>
 										</svg>
 										<div class="flex-grow">
 											<p class="text-sm text-green-700 font-medium">{coverage.title}</p>
@@ -175,9 +186,13 @@
 					{/if}
 
 					<!-- Selection indicator -->
-					<div class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4">
+					<div
+						class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4"
+					>
 						{#if isSelected}
-							<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+							<div
+								class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center"
+							>
 								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"
@@ -194,9 +209,9 @@
 	{/each}
 
 	<!-- Basic protection (small card) - packages with 0-2 stars -->
-	{#each data.packages.filter(pkg => pkg.ratingStars <= 2) as pkg (pkg.id)}
+	{#each data.packages.filter((pkg) => pkg.ratingStars <= 2) as pkg (pkg.id)}
 		{@const isSelected = selectedProtectionId === pkg.id}
-		
+
 		<div class="mb-8 flex justify-center">
 			<button
 				onclick={() => (selectedProtectionId = pkg.id)}
@@ -271,8 +286,12 @@
 
 				<!-- Selection indicator -->
 				{#if isSelected}
-					<div class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4">
-						<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+					<div
+						class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4"
+					>
+						<div
+							class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center"
+						>
 							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
 	interface PageState {
@@ -59,7 +60,7 @@
 			localStorage.setItem('sixt_bookings', JSON.stringify(recentBookings));
 
 			// Redirect to booking page with the ID
-			window.location.href = `/booking/${data.id}`;
+			goto(`/booking/${data.id}`);
 		} catch (err) {
 			state.error = err instanceof Error ? err.message : 'An error occurred';
 		} finally {
@@ -68,7 +69,7 @@
 	}
 
 	function goToBooking(bookingId: string) {
-		window.location.href = `/booking/${bookingId}`;
+		goto(`/booking/${bookingId}`);
 	}
 
 	function formatDate(timestamp: number): string {
