@@ -25,14 +25,15 @@
 				redirectPath = booking.redirectPath;
 			})
 			.catch(() => {
-				goto('/kiosk?error=notfound');
+				goto(`/kiosk?error=${encodeURIComponent('Booking not found')}`);
 			});
 
 		data.recommendation
 			.then((recommendation) => recommendationsStore.set(recommendation))
 			.catch((e) => {
-				console.error(e);
+				console.error('Failed to load AI recommendatations');
 				recommendationsStore.set(undefined);
+				goto(`/kiosk?error=${encodeURIComponent('Failed to load AI recommendations')}`);
 			});
 	}
 

@@ -6,9 +6,10 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
-	let code: string = '';
+	let code: string = $state('');
 	let inputEl: HTMLInputElement | null = null;
-	let message: string | null = null;
+	let message: string | null = $state(null);
+	let errorMessage: string | null = $derived($page.url.searchParams.get('error'));
 
 	onMount(() => {
 		// Try to focus the hidden/visible input so a USB scanner will type into it
@@ -55,10 +56,10 @@
 			Use the on-screen field below. A USB scanner will input the booking ID automatically.
 		</p>
 
-		{#if $page.url.searchParams.has('error')}
+		{#if errorMessage !== null}
 			<div
 				role="alert"
-				class="w-full max-w-3xl mb-6 p-4 rounded-md bg-red-600 text-white flex items-start gap-4 shadow"
+				class="md:w-96 lg:w-[40rem] mb-6 p-4 rounded-md bg-red-600 text-white flex items-start gap-4 shadow"
 			>
 				<!-- Icon -->
 				<svg
@@ -80,12 +81,7 @@
 				<div class="flex-1 text-left">
 					<div class="font-semibold">Error</div>
 					<div class="text-sm mt-1">
-						{$page.url.searchParams.get('error') ?? 'An unknown error occurred.'}
-						{#if $page.url.searchParams.get('error_description')}
-							<span class="block text-gray-100/90 mt-1"
-								>{$page.url.searchParams.get('error_description')}</span
-							>
-						{/if}
+						{errorMessage}
 					</div>
 				</div>
 
@@ -94,12 +90,7 @@
 					aria-label="Dismiss error"
 					class="ml-4 px-2 py-1 rounded bg-red-700/80 hover:bg-red-700"
 					on:click={() => {
-						const u = new URL(window.location.href);
-						u.searchParams.delete('error');
-						u.searchParams.delete('error_description');
-						history.replaceState({}, '', u.toString());
-						message = null;
-						inputEl?.focus();
+						goto('/kiosk');
 					}}
 				>
 					<span class="sr-only">Dismiss</span>
