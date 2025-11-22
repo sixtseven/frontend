@@ -6,7 +6,7 @@
 	export let autoSpeak: boolean = false;
 	export let useElevenLabs: boolean = false;
 	export let onSpeechEnd: (() => void) | undefined = undefined;
-	export let variant: 'premium' | 'minimal' = 'minimal';
+	export let variant: 'premium' | 'medium' | 'minimal' = 'medium';
 
 	// Set image URLs based on variant (reactive)
 	$: idleImageUrl = `/avatar-closed-${variant}.png`;

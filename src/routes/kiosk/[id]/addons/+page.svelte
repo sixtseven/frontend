@@ -18,8 +18,8 @@
 	let isLoading = $state(false);
 
 	// Determine avatar variant based on whether any addons are selected
-	const avatarVariant = $derived<'premium' | 'minimal'>(
-		Object.values(selections).some(qty => qty > 0) ? 'premium' : 'minimal'
+	const avatarVariant = $derived<'premium' | 'medium' | 'minimal'>(
+		Object.values(selections).some(qty => qty > 0) ? 'premium' : 'medium'
 	);
 
 	// Determine if an addon is "premium" (recommended/nudged)

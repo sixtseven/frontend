@@ -42,7 +42,7 @@
 				<div style="transform: scale(3);">
 					<SpeakingAvatar
 						text="Welcome! Let me load your booking information."
-						variant="minimal"
+						variant="medium"
 						useElevenLabs={true}
 						autoSpeak={false}
 					/>
@@ -59,7 +59,7 @@
 				<div style="transform: scale(3);">
 					<SpeakingAvatar
 						text="Welcome! Let me load your booking information."
-						variant="minimal"
+						variant="medium"
 						useElevenLabs={true}
 						autoSpeak={true}
 						onSpeechEnd={handleSpeechEnd}

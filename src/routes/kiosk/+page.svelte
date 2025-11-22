@@ -43,7 +43,7 @@
 		<div class="mb-8">
 			<SpeakingAvatar
 				text="Welcome to Sixt! Please scan your booking QR code to get started."
-				variant="minimal"
+				variant="medium"
 				useElevenLabs={true}
 				autoSpeak={true}
 			/>

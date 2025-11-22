@@ -27,9 +27,19 @@
 		}, data.packages[0])
 	);
 
+	// Find the worst protection (lowest rating stars)
+	const worstProtection = $derived(
+		data.packages.reduce((worst, pkg) => {
+			if (!worst) return pkg;
+			if (pkg.ratingStars < worst.ratingStars) return pkg;
+			return worst;
+		}, data.packages[0])
+	);
+
 	// Determine avatar variant based on selected protection
-	const avatarVariant = $derived<'premium' | 'minimal'>(
-		selectedProtectionId === bestProtection?.id ? 'premium' : 'minimal'
+	const avatarVariant = $derived<'premium' | 'medium' | 'minimal'>(
+		selectedProtectionId === bestProtection?.id ? 'premium' :
+		selectedProtectionId === worstProtection?.id ? 'minimal' : 'medium'
 	);
 
 	onMount(() => {
@@ -190,7 +200,7 @@
 		<div class="mb-8 flex justify-center">
 			<button
 				onclick={() => (selectedProtectionId = pkg.id)}
-				class="w-full max-w-2xl bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-5 text-left relative {isSelected
+				class="w-full max-w-3xl bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-5 text-left relative {isSelected
 					? 'ring-2 ring-sixt-orange'
 					: 'border border-gray-200'}"
 			>

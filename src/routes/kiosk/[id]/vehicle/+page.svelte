@@ -11,10 +11,10 @@
 	let isLoading = $state(false);
 
 	// Determine avatar variant based on selected vehicle
-	const avatarVariant = $derived<'premium' | 'minimal'>(
+	const avatarVariant = $derived<'premium' | 'medium' | 'minimal'>(
 		data.vehicles.length > 1 && selectedVehicleId === data.vehicles[1].vehicle.id
 			? 'premium'
-			: 'minimal'
+			: 'medium'
 	);
 
 	onMount(() => {
@@ -116,10 +116,10 @@
 			{@const originalVehicle = originalDeal.vehicle}
 			{@const isOriginalSelected = selectedVehicleId === originalVehicle.id}
 			
-			<div class="mb-8">
+			<div class="mb-8 flex justify-center">
 				<button
 					onclick={() => handleSelectVehicle(originalVehicle.id)}
-					class="w-full max-w-xl mx-auto flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
+					class="w-full max-w-3xl flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
 						? 'ring-2 ring-sixt-orange'
 						: 'border border-gray-200'}"
 				>
