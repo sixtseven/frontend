@@ -1,13 +1,19 @@
 <script lang="ts">
-	import sixtIcon from '$lib/assets/sixt.svg';
+	import sixtIcon from '$lib/assets/sixt7.png';
+	import mascot from '$lib/assets/sixtseven.png';
 </script>
 
 <div class="min-h-screen bg-white font-sixt flex flex-col items-center justify-start">
+	<!-- Mascot -->
+	<div class="mt-12 flex items-center justify-center">
+		<img src={mascot} alt="SixtSeven mascot" class="w-56 h-auto object-contain" />
+	</div>
+
 	<!-- Top logos -->
 	<div class="w-full max-w-4xl flex items-center justify-center gap-20 px-6 py-6">
-		<img src="/hackatum.png" alt="Hackatum" class=" h-40 w-auto object-contain" />
-		<div class="text-gray-400 text-8xl">//</div>
-		<img src={sixtIcon} alt="SIXT" class=" h-32 w-auto object-contain" />
+		<img src="/hackatum.png" alt="Hackatum" class=" h-20 w-auto object-contain" />
+		<div class="text-gray-400 text-4xl">//</div>
+		<img src={sixtIcon} alt="SIXT" class=" h-10 w-auto object-contain" />
 	</div>
 
 	<!-- Short description -->

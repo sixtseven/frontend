@@ -16,8 +16,28 @@
 		}
 	});
 
-	function formatPrice(amount: number): string {
-		return (amount / 100).toFixed(2);
+	function formatUnit(unit?: string): string {
+		switch (unit) {
+			case 'EUR':
+				return '€';
+			case 'USD':
+				return '$';
+			default:
+				return '';
+		}
+	}
+
+	function formatPrice({
+		amount,
+		currency,
+		prefix
+	}: {
+		amount: number;
+		currency: string;
+		prefix: string;
+		suffix: string;
+	}): string {
+		return `${prefix}${amount.toFixed(2)}${formatUnit(currency)}`;
 	}
 
 	function getMainImage(vehicle: Vehicle): string {
@@ -69,19 +89,6 @@
 </script>
 
 <div class="min-h-screen bg-white flex flex-col">
-	<!-- Orange banner -->
-	<div class="bg-sixt-orange h-1"></div>
-
-	<!-- Header -->
-	<header class="bg-white border-b border-gray-200">
-		<div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-			<SixtIcon class="h-8" />
-			<div class="text-sm text-gray-600 uppercase tracking-widest font-semibold">
-				Vehicle Selection
-			</div>
-		</div>
-	</header>
-
 	<!-- Main content -->
 	<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12">
 		<div class="mb-8">
@@ -175,23 +182,24 @@
 
 						<!-- Pricing section -->
 						<div class="mt-auto text-center">
-							{#if deal.pricing.discountPercentage > 0}
+							{#if deal.pricing.discountPercentage > 0 && deal.pricing.listPrice !== undefined}
 								<div class="text-xs text-gray-500 line-through mb-1">
-									{deal.pricing.listPrice?.prefix}
-									{formatPrice(deal.pricing.listPrice?.amount || 0)}
+									{formatPrice(deal.pricing.listPrice)}
 									{deal.pricing.listPrice?.suffix}
 								</div>
 							{/if}
-							<div class="font-bold text-lg text-sixt-orange">
-								{deal.pricing.displayPrice.prefix}
-								<span>{formatPrice(deal.pricing.displayPrice.amount)}</span>
-								<span class="text-xs font-normal">{deal.pricing.displayPrice.suffix}</span>
-							</div>
-							<div class="text-xs text-gray-600 mt-1">
-								{deal.pricing.totalPrice.prefix}
-								{formatPrice(deal.pricing.totalPrice.amount)}
-								{deal.pricing.totalPrice.suffix}
-							</div>
+							{#if deal.pricing.totalPrice.amount === 0}
+								<div class="text-md text-gray-600 mb-5">included</div>
+							{:else}
+								<div class="font-bold text-lg text-sixt-orange">
+									<span>{formatPrice(deal.pricing.displayPrice)}</span>
+									<span class="text-xs font-normal">{deal.pricing.displayPrice.suffix}</span>
+								</div>
+								<div class="text-xs text-gray-600 mt-1">
+									{formatPrice(deal.pricing.totalPrice)}
+									{deal.pricing.totalPrice.suffix}
+								</div>
+							{/if}
 						</div>
 					</div>
 				</button>
@@ -216,13 +224,4 @@
 			</button>
 		</div>
 	</main>
-
-	<!-- Footer -->
-	<footer class="bg-gray-900 text-gray-300 py-6 px-6 mt-auto">
-		<div class="max-w-7xl mx-auto text-center text-xs">
-			<p class="uppercase tracking-widest">
-				&copy; 2025 SixtSeven — Hackatum X 2025 | Automated Key Vending System
-			</p>
-		</div>
-	</footer>
 </div>
