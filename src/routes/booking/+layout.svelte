@@ -23,7 +23,7 @@
 	<footer class="bg-gray-900 text-gray-300 py-12 px-6 mt-auto">
 		<div class="max-w-7xl mx-auto text-center text-sm">
 			<p class="uppercase tracking-widest">
-				&copy; 2025 SIXT. All rights reserved. | Automated Key Vending System
+				&copy; 2025 SixtSeven — Hackatum X 2025 | Automated Key Vending System
 			</p>
 		</div>
 	</footer>
