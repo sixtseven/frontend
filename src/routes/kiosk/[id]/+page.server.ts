@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params }) => {
             booking: `/kiosk/${bookingId}/vehicle`,
             vehicleSelected: `/kiosk/${bookingId}/protections`,
             rent: `/kiosk/${bookingId}/addons`,
-            completed: `/kiosk/${bookingId}/completed`
+            completed: `/kiosk/${bookingId}/summary`
             // Add more status mappings as needed
         };
 
