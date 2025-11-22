@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import SixtIcon from '$lib/assets/SixtIcon.svelte';
+	import sixtIconWhite from '$lib/assets/sixt7-white.png';
+	import mascot from '$lib/assets/sixtseven.png';
 
 	let code: string = '';
 	let inputEl: HTMLInputElement | null = null;
@@ -32,7 +33,9 @@
 	class="flex-grow flex items-center justify-center py-12 px-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white"
 >
 	<div class="max-w-3xl w-full text-center text-white flex flex-col items-center">
-		<SixtIcon class="h-20 mb-8" />
+		<img src={sixtIconWhite} alt="SIXT" class="h-10 mb-8 w-auto" />
+
+		<img src={mascot} alt="SixtSeven mascot" class="w-40 mb-10 h-auto object-contain" />
 
 		<h1 class="text-4xl md:text-5xl font-bold mb-4">Scan your booking QR code</h1>
 		<p class="text-lg text-gray-300 mb-8">
