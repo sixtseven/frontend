@@ -107,7 +107,22 @@
 				throw new Error('One or more addon selections failed');
 			}
 
-			// Navigate to next step (rent or completed)
+			// Complete the booking
+			const completeResponse = await fetch(
+				`/api/booking/${encodeURIComponent(data.bookingId)}/complete`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+
+			if (!completeResponse.ok) {
+				throw new Error('Failed to complete booking');
+			}
+
+			// Navigate to summary page
 			goto(`/kiosk/${encodeURIComponent(data.bookingId)}/summary`);
 		} catch (err) {
 			console.error('Error confirming addons:', err);
