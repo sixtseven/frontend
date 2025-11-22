@@ -42,8 +42,7 @@
 				<div style="transform: scale(3);">
 					<SpeakingAvatar
 						text="Welcome! Let me load your booking information."
-						idleImageUrl="/avatar-closed.png"
-						speakingImageUrl="/avatar-open.png"
+						variant="minimal"
 						useElevenLabs={true}
 						autoSpeak={false}
 					/>
@@ -60,8 +59,7 @@
 				<div style="transform: scale(3);">
 					<SpeakingAvatar
 						text="Welcome! Let me load your booking information."
-						idleImageUrl="/avatar-closed.png"
-						speakingImageUrl="/avatar-open.png"
+						variant="minimal"
 						useElevenLabs={true}
 						autoSpeak={true}
 						onSpeechEnd={handleSpeechEnd}

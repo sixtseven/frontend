@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { ProtectionPackage } from './+page.server';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
+	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 
 	interface Props {
 		data: {
@@ -15,11 +16,26 @@
 	let selectedProtectionId: string | null = $state(null);
 	let isLoading = $state(false);
 
+	// Find the best protection (highest rating stars or marked as nudge)
+	const bestProtection = $derived(
+		data.packages.reduce((best, pkg) => {
+			if (!best) return pkg;
+			if (pkg.isNudge) return pkg;
+			if (best.isNudge) return best;
+			if (pkg.ratingStars > best.ratingStars) return pkg;
+			return best;
+		}, data.packages[0])
+	);
+
+	// Determine avatar variant based on selected protection
+	const avatarVariant = $derived<'premium' | 'minimal'>(
+		selectedProtectionId === bestProtection?.id ? 'premium' : 'minimal'
+	);
+
 	onMount(() => {
-		// Pre-select the default (already selected or first) protection
-		const defaultProtection = data.packages.find((pkg) => pkg.isSelected);
-		if (defaultProtection) {
-			selectedProtectionId = defaultProtection.id;
+		// Pre-select the best (recommended) protection, unless one is already selected
+		if (bestProtection) {
+			selectedProtectionId = bestProtection.id;
 		} else if (data.packages.length > 0) {
 			selectedProtectionId = data.packages[0].id;
 		}
@@ -66,131 +82,200 @@
 </script>
 
 <!-- Main content -->
-<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-12">
-	<div class="mb-8">
-		<h1 class="text-4xl font-bold text-gray-900 mb-2">Choose Your Protection</h1>
-		<p class="text-lg text-gray-600">Select a protection package for your rental</p>
+<main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
+	<div class="mb-12 flex items-start justify-between gap-8">
+		<div class="flex-grow">
+			<h1 class="text-4xl font-bold text-gray-900 mb-2">Choose Your Protection</h1>
+			<p class="text-lg text-gray-600">
+				We recommend our premium protection for complete peace of mind
+			</p>
+		</div>
 	</div>
 
-	<!-- Protection packages grid -->
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-		{#each data.packages as pkg (pkg.id)}
-			{@const isSelected = selectedProtectionId === pkg.id}
+	<!-- Recommended protection (large card) - packages with 3+ stars or isNudge -->
+	{#each data.packages.filter(pkg => pkg.ratingStars > 2 || pkg.isNudge) as pkg (pkg.id)}
+		{@const isSelected = selectedProtectionId === pkg.id}
+		
+		<div class="mb-12 flex justify-center">
 			<button
 				onclick={() => (selectedProtectionId = pkg.id)}
-				class="relative flex flex-col text-left bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-6 {isSelected
+				class="w-full max-w-3xl bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden relative {isSelected
+					? 'ring-4 ring-sixt-orange'
+					: 'border-2 border-gray-200'}"
+			>
+				<!-- Recommended badge (top left of card) -->
+				<div class="absolute top-2 left-2 bg-sixt-orange text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg z-10">
+					⭐ Recommended Protection
+				</div>
+
+				<!-- Content -->
+				<div class="p-8 text-left">
+					<!-- Header with name and rating -->
+					<div class="flex justify-between items-start mb-4">
+						<div class="flex-grow">
+							<h3 class="text-3xl font-bold text-gray-900 mb-2">{pkg.name}</h3>
+							{#if pkg.ratingStars > 0}
+								<div class="text-base text-gray-600">{getStarRating(pkg.ratingStars)}</div>
+							{/if}
+						</div>
+						<div class="text-right ml-6">
+							{#if pkg.price.discountPercentage > 0 && pkg.price.listPrice}
+								<div class="text-sm text-gray-500 line-through mb-1">
+									{formatPrice(pkg.price.listPrice.amount)}
+									{pkg.price.listPrice.suffix}
+								</div>
+							{/if}
+							<div class="font-bold text-2xl text-sixt-orange mb-1">
+								<span>{formatPrice(pkg.price.displayPrice.amount)}</span>
+								<span class="text-base font-normal">{pkg.price.displayPrice.suffix}</span>
+							</div>
+							{#if pkg.price.discountPercentage > 0}
+								<div class="text-xs text-green-600 font-semibold">
+									{pkg.price.discountPercentage}% off
+								</div>
+							{/if}
+						</div>
+					</div>
+
+					<!-- Description -->
+					{#if pkg.description}
+						<p class="text-base text-gray-600 mb-4">{pkg.description}</p>
+					{/if}
+
+					<!-- Includes section -->
+					{#if pkg.includes.length > 0}
+						<div class="mb-4">
+							<h4 class="text-lg font-semibold text-gray-900 mb-3">What's Included:</h4>
+							<div class="space-y-2.5">
+								{#each pkg.includes as coverage}
+									<div class="flex items-start gap-3">
+										<svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+											<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+										</svg>
+										<div class="flex-grow">
+											<p class="text-sm text-green-700 font-medium">{coverage.title}</p>
+											{#if coverage.description}
+												<p class="text-xs text-gray-600 mt-0.5">{coverage.description}</p>
+											{/if}
+										</div>
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Selection indicator -->
+					<div class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4">
+						{#if isSelected}
+							<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+						{/if}
+					</div>
+				</div>
+			</button>
+		</div>
+	{/each}
+
+	<!-- Basic protection (small card) - packages with 0-2 stars -->
+	{#each data.packages.filter(pkg => pkg.ratingStars <= 2) as pkg (pkg.id)}
+		{@const isSelected = selectedProtectionId === pkg.id}
+		
+		<div class="mb-8 flex justify-center">
+			<button
+				onclick={() => (selectedProtectionId = pkg.id)}
+				class="w-full max-w-2xl bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-5 text-left relative {isSelected
 					? 'ring-2 ring-sixt-orange'
 					: 'border border-gray-200'}"
 			>
-				<!-- Header with name and price -->
-				<div class="flex justify-between items-start mb-4">
+				<!-- Header -->
+				<div class="flex justify-between items-start mb-3">
 					<div class="flex-grow">
-						<h3 class="text-xl font-bold text-gray-900">{pkg.name}</h3>
-						{#if pkg.ratingStars > 0}
-							<div class="text-sm text-gray-600 mt-1">{getStarRating(pkg.ratingStars)}</div>
+						<div class="flex items-center gap-2 mb-1">
+							<h3 class="text-lg font-bold text-gray-900">{pkg.name}</h3>
+							{#if pkg.ratingStars > 0}
+								<span class="text-sm text-gray-600">{getStarRating(pkg.ratingStars)}</span>
+							{/if}
+						</div>
+						{#if pkg.description}
+							<p class="text-xs text-gray-600 mb-2">{pkg.description}</p>
 						{/if}
 					</div>
-					<div class="text-right ml-4">
-						{#if pkg.price.discountPercentage > 0}
-							<div class="text-sm text-gray-500 line-through">
-								{pkg.price.listPrice?.amount && formatPrice(pkg.price.listPrice.amount)}
+					<div class="text-right ml-4 flex-shrink-0">
+						{#if pkg.price.discountPercentage > 0 && pkg.price.listPrice}
+							<div class="text-xs text-gray-500 line-through">
+								{formatPrice(pkg.price.listPrice.amount)}
 							</div>
 						{/if}
-						<div class="font-bold text-lg text-sixt-orange">
+						<div class="font-bold text-base text-sixt-orange">
 							{formatPrice(pkg.price.displayPrice.amount)}
-							<span class="text-sm">{pkg.price.displayPrice.suffix}</span>
+							<span class="text-xs">{pkg.price.displayPrice.suffix}</span>
 						</div>
-						{#if pkg.price.discountPercentage > 0}
-							<div class="text-xs text-green-600 font-semibold">
-								{pkg.price.discountPercentage}% off
-							</div>
-						{/if}
 					</div>
 				</div>
 
 				<!-- Warning for 0-star protection -->
 				{#if pkg.ratingStars === 0}
-					<div class="mb-4 p-3 bg-sixt-danger/10 border border-sixt-danger/30 rounded-lg">
-						<p class="text-sm font-semibold text-sixt-danger">
-							⚠️ This protection package does <strong>NOT</strong> offer any protection.
+					<div class="mb-3 p-2 bg-red-50 border border-red-200 rounded">
+						<p class="text-xs font-semibold text-red-600">
+							⚠️ This package does NOT offer any protection coverage
 						</p>
 					</div>
 				{/if}
 
-				<!-- Description -->
-				{#if pkg.description}
-					<p class="text-sm text-gray-600 mb-4">{pkg.description}</p>
-				{/if}
-
-				<!-- Includes section -->
+				<!-- Includes section (compact) -->
 				{#if pkg.includes.length > 0}
-					<div class="mb-4">
-						<h4 class="text-sm font-semibold text-gray-900 mb-2">Includes:</h4>
-						<ul class="space-y-2">
+					<div class="mb-3">
+						<h4 class="text-xs font-semibold text-gray-900 mb-2">Includes:</h4>
+						<div class="space-y-1">
 							{#each pkg.includes as coverage}
-								<li class="flex items-start gap-2 text-sm text-gray-700">
-									<span class="text-sixt-success font-bold mt-0.5">✓</span>
-									<div>
-										<div class="flex items-center gap-1 font-medium">
-											{coverage.title}
-											{#if coverage.description}
-												<div class="relative group inline-block">
-													<div
-														class="text-gray-400 group-hover:text-gray-600 transition inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-400 text-xs font-bold cursor-help"
-													>
-														?
-													</div>
-													<div
-														class="invisible group-hover:visible absolute z-10 bg-gray-900 text-white text-xs rounded-lg py-2 px-3 whitespace-normal w-40 bottom-full left-1/2 transform -translate-x-1/2 mb-2 pointer-events-none group-hover:pointer-events-auto"
-													>
-														{coverage.description}
-														<div
-															class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"
-														></div>
-													</div>
-												</div>
-											{/if}
-										</div>
-									</div>
-								</li>
+								<div class="flex items-start gap-2">
+									<span class="text-green-600 text-xs mt-0.5">✓</span>
+									<p class="text-xs text-gray-700">{coverage.title}</p>
+								</div>
 							{/each}
-						</ul>
+						</div>
 					</div>
 				{/if}
 
-				<!-- Excludes section -->
+				<!-- Excludes section (compact) -->
 				{#if pkg.excludes.length > 0}
-					<div class="mb-4 pt-4 border-t border-gray-200">
-						<h4 class="text-sm font-semibold text-gray-900 mb-2">Does not include:</h4>
-						<ul class="space-y-1">
+					<div class="pt-2 border-t border-gray-200">
+						<h4 class="text-xs font-semibold text-red-700 mb-1">Does not include:</h4>
+						<div class="space-y-0.5">
 							{#each pkg.excludes as coverage}
-								<li class="flex items-start gap-2 text-xs text-gray-600">
-									<span class="text-sixt-danger font-bold mt-0.5">!</span>
-									<span>{coverage.title}</span>
-								</li>
+								<div class="flex items-start gap-2">
+									<span class="text-red-600 text-xs font-bold">✗</span>
+									<p class="text-xs text-red-700 font-medium">{coverage.title}</p>
+								</div>
 							{/each}
-						</ul>
+						</div>
 					</div>
 				{/if}
 
 				<!-- Selection indicator -->
 				{#if isSelected}
-					<div class="mt-auto pt-4 border-t border-sixt-orange/20">
-						<div class="flex items-center gap-2 text-sixt-orange font-semibold">
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+					<div class="ml-3 w-10 h-10 flex items-center justify-center flex-shrink-0 absolute bottom-4 right-4">
+						<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center">
+							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
 									clip-rule="evenodd"
 								/>
 							</svg>
-							Selected
 						</div>
 					</div>
 				{/if}
 			</button>
-		{/each}
-	</div>
+		</div>
+	{/each}
 
 	<!-- Confirm button -->
 	<div class="flex justify-center gap-4">
@@ -210,3 +295,13 @@
 		</button>
 	</div>
 </main>
+
+<!-- Avatar positioned at bottom right -->
+<div class="fixed bottom-8 right-8 scale-150">
+	<SpeakingAvatar
+		text="Choose the protection package that best suits your needs. We recommend our premium protection for complete peace of mind during your journey."
+		variant={avatarVariant}
+		useElevenLabs={true}
+		autoSpeak={true}
+	/>
+</div>

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { AddonGroup, AddonOption } from './+page.server';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
+	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 
 	interface Props {
 		data: {
@@ -15,6 +16,11 @@
 	// Track quantities for each addon option by ID
 	let selections: Record<string, number> = $state({});
 	let isLoading = $state(false);
+
+	// Determine avatar variant based on whether any addons are selected
+	const avatarVariant = $derived<'premium' | 'minimal'>(
+		Object.values(selections).some(qty => qty > 0) ? 'premium' : 'minimal'
+	);
 
 	onMount(() => {
 		// Initialize quantities based on currentSelection from API
@@ -197,3 +203,13 @@
 		</button>
 	</div>
 </main>
+
+<!-- Avatar positioned at bottom right -->
+<div class="fixed bottom-8 right-8 scale-150">
+	<SpeakingAvatar
+		text="Enhance your rental experience with our premium add-ons! Select any items you'd like to add to make your journey even more comfortable and convenient."
+		variant={avatarVariant}
+		useElevenLabs={true}
+		autoSpeak={true}
+	/>
+</div>
