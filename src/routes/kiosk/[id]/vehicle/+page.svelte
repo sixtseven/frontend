@@ -303,7 +303,7 @@
 		<!-- Confirm button -->
 		<div class="flex justify-center gap-4">
 			<button
-				onclick={() => window.history.back()}
+				onclick={() => goto('/kiosk')}
 				class="px-8 py-3 bg-gray-700 hover:bg-gray-800 text-white font-bold rounded shadow transition"
 				disabled={isLoading}
 			>
@@ -322,7 +322,7 @@
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar
-			text="We found the perfect car for you! We recommend this vehicle because it has a spacious interior perfect for families with 5 or more passengers, large trunk space for all your luggage and equipment, and premium comfort features for long-distance travel."
+			text={recommendations?.upsell_summary}
 			variant={avatarVariant}
 			useElevenLabs={true}
 			autoSpeak={true}

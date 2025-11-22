@@ -76,6 +76,7 @@ export interface Recommendations {
     base_car: { raw: Deal }
     upsell_car: { raw: Deal }
     upsell_reasons: string[]
+    upsell_summary: string
 }
 
 export const recommendationsStore = writable<Recommendations | undefined>(undefined);

@@ -152,6 +152,7 @@
 				isLoading = false;
 				isSpeaking = false;
 				stopMouthAnimation();
+				if (onSpeechEnd) onSpeechEnd();
 			};
 
 			await audioElement.play();
@@ -160,6 +161,7 @@
 			isLoading = false;
 			isSpeaking = false;
 			stopMouthAnimation();
+			if (onSpeechEnd) onSpeechEnd();
 		}
 	};
 
@@ -188,6 +190,7 @@
 			console.error('Speech synthesis error:', event);
 			isSpeaking = false;
 			stopMouthAnimation();
+			if (onSpeechEnd) onSpeechEnd();
 
 			// If browser TTS fails due to "not-allowed", silently skip (no callback)
 			// This happens when there's no user interaction
@@ -203,6 +206,7 @@
 			console.error('Failed to start speech synthesis:', err);
 			isSpeaking = false;
 			stopMouthAnimation();
+			if (onSpeechEnd) onSpeechEnd();
 		}
 	};
 
