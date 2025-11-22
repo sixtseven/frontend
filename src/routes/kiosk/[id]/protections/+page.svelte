@@ -70,8 +70,8 @@
 				throw new Error(`Failed to confirm protection: ${response.statusText}`);
 			}
 
-			// Navigate to next step (rent or completed)
-			window.location.href = `/kiosk/${encodeURIComponent(data.bookingId)}/rent`;
+			// Navigate to next step (addons)
+			window.location.href = `/kiosk/${encodeURIComponent(data.bookingId)}/addons`;
 		} catch (err) {
 			console.error('Error confirming protection:', err);
 			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
