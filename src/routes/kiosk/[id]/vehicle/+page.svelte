@@ -16,9 +16,7 @@
 
 	// Determine avatar variant based on selected vehicle
 	const avatarVariant = $derived<'premium' | 'medium' | 'minimal'>(
-		data.vehicles.length > 1 && selectedVehicleId === data.vehicles[1].vehicle.id
-			? 'premium'
-			: 'medium'
+		selectedVehicleId === recommendedDeal?.vehicle.id ? 'premium' : 'medium'
 	);
 
 	onMount(() => {
@@ -104,66 +102,6 @@
 				<p class="text-lg text-gray-600">We have a special recommendation for you</p>
 			</div>
 		</div>
-
-		<!-- Original booked vehicle (small card) -->
-		{#if data.vehicles.length > 0}
-			{@const originalDeal = data.vehicles[0]}
-			{@const originalVehicle = originalDeal.vehicle}
-			{@const isOriginalSelected = selectedVehicleId === originalVehicle.id}
-			
-			<div class="mb-8 flex justify-center">
-				<button
-					onclick={() => handleSelectVehicle(originalVehicle.id)}
-					class="w-full max-w-3xl flex items-center bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden p-3 {isOriginalSelected
-						? 'ring-2 ring-sixt-orange'
-						: 'border border-gray-200'}"
-				>
-					<!-- Small vehicle image -->
-					<div class="w-36 h-24 flex-shrink-0 bg-gradient-to-b from-gray-100 to-gray-50 rounded-lg flex items-center justify-center p-2 mr-3 relative">
-						<img
-							src={getMainImage(originalVehicle)}
-							alt="{originalVehicle.brand} {originalVehicle.model}"
-							class="max-w-full max-h-full object-contain"
-						/>
-						
-						<!-- Your Original Booking badge -->
-						<div class="absolute top-1 left-1 bg-gray-600 text-white px-2 py-1 rounded text-[11px] font-semibold shadow-md">
-							Your Original Booking
-						</div>
-					</div>
-
-					<!-- Vehicle info -->
-					<div class="flex-grow text-left">
-						<h3 class="text-base font-bold text-gray-900">
-							{originalVehicle.brand} {originalVehicle.model}
-						</h3>
-						<p class="text-xs text-gray-500 mb-1">{originalVehicle.groupType}</p>
-						
-						{#if originalDeal.pricing.totalPrice.amount === 0}
-							<p class="text-xs text-gray-600">included in your booking</p>
-						{:else}
-							<p class="font-semibold text-sm text-gray-900">
-								{formatPrice(originalDeal.pricing.displayPrice)}
-								<span class="text-xs font-normal">{originalDeal.pricing.displayPrice.suffix}</span>
-							</p>
-						{/if}
-					</div>
-
-					<!-- Selection indicator -->
-					{#if isOriginalSelected}
-						<div class="ml-3 bg-sixt-orange text-white rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-						</div>
-					{/if}
-				</button>
-			</div>
-		{/if}
 
 		<!-- Recommended vehicle (large card) -->
 		{#if recommendedDeal !== undefined}

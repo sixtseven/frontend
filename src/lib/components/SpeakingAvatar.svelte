@@ -38,7 +38,7 @@
 		const source = audioContext.createMediaElementSource(audio);
 		analyser = audioContext.createAnalyser();
 		analyser.fftSize = 256;
-		
+
 		source.connect(analyser);
 		analyser.connect(audioContext.destination);
 
@@ -49,10 +49,10 @@
 			if (!analyser || !isSpeaking) return;
 
 			analyser.getByteFrequencyData(dataArray);
-			
+
 			// Calculate average volume
 			const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-			
+
 			// Open mouth if there's significant audio
 			currentImage = average > 30 ? speakingImageUrl : idleImageUrl;
 
@@ -78,7 +78,7 @@
 		if (!browser) return;
 
 		const speechText = textToSpeak || text;
-		
+
 		if (!speechText) {
 			console.warn('Text is empty');
 			return;
@@ -99,7 +99,7 @@
 			console.warn('Cannot use ElevenLabs during SSR');
 			return;
 		}
-		
+
 		try {
 			isLoading = true;
 
@@ -188,7 +188,7 @@
 			console.error('Speech synthesis error:', event);
 			isSpeaking = false;
 			stopMouthAnimation();
-			
+
 			// If browser TTS fails due to "not-allowed", silently skip (no callback)
 			// This happens when there's no user interaction
 			if (event.error === 'not-allowed') {
@@ -230,13 +230,13 @@
 	};
 
 	onMount(() => {
-		if (autoSpeak && text) {
+		if (autoSpeak && text && browser) {
 			speak();
 		}
 	});
 
 	onDestroy(() => {
-		stop();
+		if (browser) stop();
 	});
 </script>
 

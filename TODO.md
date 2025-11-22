@@ -1,1 +1,2 @@
 - unify protections and vehicle price string generation
+- fallback to most expensive car if there is no recommendation??
