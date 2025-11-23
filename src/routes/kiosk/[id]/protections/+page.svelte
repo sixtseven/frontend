@@ -40,15 +40,12 @@
 	const secondBestProtection = $derived(sortedPackages[1] || sortedPackages[0]);
 
 	// Determine which car was chosen and get its is_expensive flag
-	const chosenCarIsExpensive = $derived(() => {
-		if (!recommendations) return false;
-
-		if (recommendations.chosen_car === 'upsell') {
-			return recommendations.upsell_car?.is_expensive ?? false;
-		} else {
-			return recommendations.base_car?.is_expensive ?? false;
-		}
-	});
+	const chosenCarIsExpensive = $derived(
+		!recommendations ? false :
+		recommendations.chosen_car === 'upsell'
+			? (recommendations.upsell_car?.is_expensive ?? false)
+			: (recommendations.base_car?.is_expensive ?? false)
+	);
 
 	// Determine recommended protection (shown as large card) based on is_expensive flag
 	const recommendedProtection = $derived(
