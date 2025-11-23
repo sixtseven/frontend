@@ -12,6 +12,10 @@
 
 	let { data }: Props = $props();
 
+	let isPickingUpKey = $state(false);
+	let keyPickupTriggered = $state(false);
+	let avatarText = $state("Thank you for choosing sixt. Have a safe and pleasant journey. We hope to see you again soon!");
+
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
 		return date.toLocaleDateString('en-US', { 
@@ -62,6 +66,33 @@
 		
 		return { amount: total, currency };
 	});
+
+	async function handlePickupKey() {
+		isPickingUpKey = true;
+
+		try {
+			// POST to trigger-broadcast endpoint via server API
+			const response = await fetch('/api/trigger-broadcast', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to trigger broadcast');
+			}
+
+			// Update avatar text
+			avatarText = "Press the button to pick up your key from the locker.";
+			keyPickupTriggered = true;
+		} catch (err) {
+			console.error('Error triggering key pickup:', err);
+			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+		} finally {
+			isPickingUpKey = false;
+		}
+	}
 
 </script>
 
@@ -264,6 +295,17 @@
 		<!-- Action buttons -->
 		<div class="flex justify-center gap-4 mt-8">
 			<button
+				onclick={handlePickupKey}
+				disabled={isPickingUpKey || keyPickupTriggered}
+				class="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				{isPickingUpKey ? 'Processing...' : keyPickupTriggered ? '✓ Key Locker Activated' : '🔑 Pick Up Your Key'}
+			</button>
+		</div>
+
+		<!-- Additional action buttons -->
+		<div class="flex justify-center gap-4 mt-4">
+			<button
 				onclick={() => window.print()}
 				class="px-8 py-3 bg-gray-700 hover:bg-gray-800 text-white font-bold rounded shadow transition"
 			>
@@ -290,7 +332,7 @@
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar
-			text="Thank you for choosing sixt. Have a safe and pleasant journey. We hope to see you again soon!"
+			text={avatarText}
 			variant="premium"
 			useElevenLabs={true}
 			autoSpeak={true}
