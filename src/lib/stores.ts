@@ -75,13 +75,20 @@ export interface VehiclesResponse {
 
 
 export interface Recommendations {
-    base_car: { raw: Deal }
-    upsell_car: { raw: Deal }
+    base_car: {
+        raw: Deal;
+        is_expensive?: boolean;
+    }
+    upsell_car: {
+        raw: Deal;
+        is_expensive?: boolean;
+    }
     upsell_reasons: string[]
     upsell_summary: string
     insurance_recommendation?: string
     additional_driver_recommendation?: string
     additional_driver_count?: number
+    chosen_car?: 'base' | 'upsell';
 }
 
 export const recommendationsStore = writable<Recommendations | undefined>(undefined);
