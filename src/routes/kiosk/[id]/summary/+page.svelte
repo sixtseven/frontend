@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { formatPrice, formatCurrencyUnit } from '$lib/utils/formatting';
@@ -12,16 +13,16 @@
 
 	let { data }: Props = $props();
 
-	let isPickingUpKey = $state(false);
-	let keyPickupTriggered = $state(false);
-	let avatarText = $state("Thank you for choosing sixt. Have a safe and pleasant journey. We hope to see you again soon!");
+	let avatarText = $state(
+		'Thank you for choosing sixt. Have a safe and pleasant journey. We hope to see you again soon!'
+	);
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', { 
-			weekday: 'long', 
-			year: 'numeric', 
-			month: 'long', 
+		return date.toLocaleDateString('en-US', {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
 			day: 'numeric',
 			hour: '2-digit',
 			minute: '2-digit'
@@ -37,19 +38,19 @@
 	const totalPrice = $derived(() => {
 		let total = 0;
 		let currency = 'EUR';
-		
+
 		// Add vehicle total price
 		if (data.booking.selectedVehicle?.pricing?.totalPrice) {
 			total += data.booking.selectedVehicle.pricing.totalPrice.amount;
 			currency = data.booking.selectedVehicle.pricing.totalPrice.currency;
 		}
-		
+
 		// Add protection total price
 		if (data.booking.protectionPackages?.price?.totalPrice) {
 			total += data.booking.protectionPackages.price.totalPrice.amount;
 			currency = data.booking.protectionPackages.price.totalPrice.currency;
 		}
-		
+
 		// Add addon prices
 		if (data.booking.addonGroups) {
 			for (const group of data.booking.addonGroups) {
@@ -63,37 +64,9 @@
 				}
 			}
 		}
-		
+
 		return { amount: total, currency };
 	});
-
-	async function handlePickupKey() {
-		isPickingUpKey = true;
-
-		try {
-			// POST to trigger-broadcast endpoint via server API
-			const response = await fetch('/api/trigger-broadcast', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to trigger broadcast');
-			}
-
-			// Update avatar text
-			avatarText = "Press the button to pick up your key from the locker.";
-			keyPickupTriggered = true;
-		} catch (err) {
-			console.error('Error triggering key pickup:', err);
-			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-		} finally {
-			isPickingUpKey = false;
-		}
-	}
-
 </script>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
@@ -103,7 +76,9 @@
 		<div class="bg-sixt-orange text-white rounded-xl p-8 mb-8 text-center shadow-lg">
 			<h2 class="text-3xl font-bold mb-2">All Set!</h2>
 			<p class="text-lg mb-2">Your vehicle is ready for pickup</p>
-			<p class="text-sm text-orange-100">Reservation ID: <span class="font-mono font-bold">{data.bookingId}</span></p>
+			<p class="text-sm text-orange-100">
+				Reservation ID: <span class="font-mono font-bold">{data.bookingId}</span>
+			</p>
 		</div>
 
 		<!-- Booking Details -->
@@ -112,25 +87,25 @@
 			{#if data.booking.selectedVehicle?.vehicle}
 				{@const vehicle = data.booking.selectedVehicle.vehicle}
 				<div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-
 					<div class="flex gap-6">
 						<!-- Vehicle Image (Left) -->
 						{#if vehicle.images && vehicle.images.length > 0}
 							<div class="w-1/2 flex-shrink-0">
-								<img 
-									src={getMainImage(vehicle.images)} 
+								<img
+									src={getMainImage(vehicle.images)}
 									alt="{vehicle.brand} {vehicle.model}"
 									class="w-full h-auto object-contain bg-gray-50 rounded-lg"
 								/>
 							</div>
 						{/if}
-						
+
 						<!-- Vehicle Details and Reservation Info (Right) -->
 						<div class="flex-grow space-y-6">
 							<!-- Vehicle Details -->
 							<div>
 								<p class="text-xl font-bold text-gray-900">
-									{vehicle.brand} {vehicle.model}
+									{vehicle.brand}
+									{vehicle.model}
 								</p>
 								{#if vehicle.groupType}
 									<p class="text-sm text-gray-600 mb-2">{vehicle.groupType}</p>
@@ -199,7 +174,7 @@
 						{/if}
 					</div>
 				</div>
-				
+
 				{#if protection.includes && protection.includes.length > 0}
 					<div class="mt-4">
 						<h4 class="text-sm font-semibold text-gray-900 mb-2">Coverage Includes:</h4>
@@ -228,7 +203,9 @@
 							{#if data.booking.addons && data.booking.addons[option.chargeDetail.id] && data.booking.addons[option.chargeDetail.id] > 0}
 								<div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
 									<span class="font-semibold text-gray-900">{option.chargeDetail.title}</span>
-									<span class="text-sm text-gray-600">×{data.booking.addons[option.chargeDetail.id]}</span>
+									<span class="text-sm text-gray-600"
+										>×{data.booking.addons[option.chargeDetail.id]}</span
+									>
 								</div>
 							{/if}
 						{/each}
@@ -256,51 +233,46 @@
 			</h3>
 			<div class="space-y-6 text-blue-800">
 				<div class="flex items-start gap-4">
-					<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0">1</div>
-					<div>
-						<p class="font-bold text-lg mb-1">Retrieve Your Keys</p>
-						<p>Use reservation ID <span class="font-mono font-bold bg-blue-100 px-2 py-1 rounded">{data.bookingId}</span> at the key box near the exit.</p>
+					<div
+						class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0"
+					>
+						1
 					</div>
-				</div>
-				<div class="flex items-start gap-4">
-					<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0">2</div>
 					<div>
 						<p class="font-bold text-lg mb-1">Locate Your Vehicle</p>
 						<p>Head to the designated pickup area. Your vehicle will be ready shortly.</p>
 					</div>
 				</div>
 				<div class="flex items-start gap-4">
-					<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0">3</div>
+					<div
+						class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0"
+					>
+						2
+					</div>
 					<div>
 						<p class="font-bold text-lg mb-1">Quick Vehicle Check</p>
 						<p>Inspect the exterior and report any existing damage to our staff.</p>
 					</div>
 				</div>
 				<div class="flex items-start gap-4">
-					<div class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0">4</div>
+					<div
+						class="bg-sixt-orange text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg flex-shrink-0"
+					>
+						3
+					</div>
 					<div>
 						<p class="font-bold text-lg mb-1">Hit the Road!</p>
 						<p>You're all set. Enjoy your journey!</p>
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="mt-6 p-4 bg-blue-100 rounded-lg">
 				<p class="text-sm text-blue-900">
-					<strong>📞 Need Assistance?</strong> Contact us at <span class="font-semibold">+1-800-SIXT-RENT</span>
+					<strong>📞 Need Assistance?</strong> Contact us at
+					<span class="font-semibold">+1-800-SIXT-RENT</span>
 				</p>
 			</div>
-		</div>
-
-		<!-- Action buttons -->
-		<div class="flex justify-center gap-4 mt-8">
-			<button
-				onclick={handlePickupKey}
-				disabled={isPickingUpKey || keyPickupTriggered}
-				class="px-12 py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-lg rounded shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-			>
-				{isPickingUpKey ? 'Processing...' : keyPickupTriggered ? '✓ Key Locker Activated' : '🔑 Pick Up Your Key'}
-			</button>
 		</div>
 
 		<!-- Additional action buttons -->
@@ -312,7 +284,7 @@
 				Print Summary
 			</button>
 			<button
-				onclick={() => window.location.href = '/kiosk'}
+				onclick={() => (window.location.href = '/kiosk')}
 				class="px-8 py-3 bg-sixt-orange hover:bg-orange-700 text-white font-bold rounded shadow transition"
 			>
 				New Rental
@@ -323,19 +295,12 @@
 	<!-- Footer -->
 	<footer class="bg-gray-800 text-white py-6 mt-12">
 		<div class="max-w-7xl mx-auto px-6 text-center">
-			<p class="text-sm text-gray-400">
-				Have a safe and enjoyable journey with SIXT!
-			</p>
+			<p class="text-sm text-gray-400">Have a safe and enjoyable journey with SIXT!</p>
 		</div>
 	</footer>
-	
+
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
-		<SpeakingAvatar
-			text={avatarText}
-			variant="premium"
-			useElevenLabs={true}
-			autoSpeak={true}
-		/>
+		<SpeakingAvatar text={avatarText} variant="premium" useElevenLabs={true} autoSpeak={true} />
 	</div>
 </div>

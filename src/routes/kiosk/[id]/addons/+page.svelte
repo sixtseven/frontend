@@ -11,7 +11,7 @@
 		data: {
 			bookingId: string;
 			addonGroups: AddonGroup[];
-		}
+		};
 	}
 
 	let { data }: Props = $props();
@@ -23,13 +23,13 @@
 
 	// Determine avatar variant based on whether any addons are selected
 	const avatarVariant = $derived<'premium' | 'medium' | 'minimal'>(
-		Object.values(selections).some(qty => qty > 0) ? 'premium' : 'medium'
+		Object.values(selections).some((qty) => qty > 0) ? 'premium' : 'medium'
 	);
 
 	// Get AI recommendation text if available
 	const avatarText = $derived(
 		recommendations?.additional_driver_recommendation ||
-		"Enhance your rental experience with our premium add-ons! Select any items you'd like to add to make your journey even more comfortable and convenient."
+			"Enhance your rental experience with our premium add-ons! Select any items you'd like to add to make your journey even more comfortable and convenient."
 	);
 
 	// Determine if an addon is "premium" (recommended/nudged)
@@ -56,7 +56,9 @@
 		return (
 			title.includes('additional driver') ||
 			title.includes('extra driver') ||
-			tags.some((tag) => tag.includes('driver') && (tag.includes('additional') || tag.includes('extra')))
+			tags.some(
+				(tag) => tag.includes('driver') && (tag.includes('additional') || tag.includes('extra'))
+			)
 		);
 	}
 
@@ -146,7 +148,7 @@
 			}
 
 			// Navigate to summary page
-			goto(`/kiosk/${encodeURIComponent(data.bookingId)}/summary`);
+			goto(`/kiosk/${encodeURIComponent(data.bookingId)}/key-locker`);
 		} catch (err) {
 			console.error('Error confirming addons:', err);
 			alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -382,17 +384,22 @@
 							? 'ring-2 ring-sixt-orange'
 							: 'border border-gray-200'}"
 					>
-					<!-- Recommended badge for additional drivers -->
-					{#if isAdditionalDriverAddon && recommendations?.additional_driver_recommendation}
-						<div
-							class="absolute top-2 left-2 bg-sixt-orange text-white px-4 py-2 rounded text-xs font-bold flex items-center gap-1 shadow z-10"
-						>
-							⭐ Recommended
-						</div>
-					{/if}
+						<!-- Recommended badge for additional drivers -->
+						{#if isAdditionalDriverAddon && recommendations?.additional_driver_recommendation}
+							<div
+								class="absolute top-2 left-2 bg-sixt-orange text-white px-4 py-2 rounded text-xs font-bold flex items-center gap-1 shadow z-10"
+							>
+								⭐ Recommended
+							</div>
+						{/if}
 
-					<!-- Header -->
-					<div class="flex gap-4 mb-3 {isAdditionalDriverAddon && recommendations?.additional_driver_recommendation ? 'mt-10' : ''}">
+						<!-- Header -->
+						<div
+							class="flex gap-4 mb-3 {isAdditionalDriverAddon &&
+							recommendations?.additional_driver_recommendation
+								? 'mt-10'
+								: ''}"
+						>
 							<img
 								src={option.chargeDetail.iconUrl}
 								alt={option.chargeDetail.title}
@@ -503,10 +510,5 @@
 
 <!-- Avatar positioned at bottom right -->
 <div class="fixed bottom-8 right-8 scale-150">
-	<SpeakingAvatar
-		text={avatarText}
-		variant={avatarVariant}
-		useElevenLabs={true}
-		autoSpeak={true}
-	/>
+	<SpeakingAvatar text={avatarText} variant={avatarVariant} useElevenLabs={true} autoSpeak={true} />
 </div>
