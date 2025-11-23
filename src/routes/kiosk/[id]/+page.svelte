@@ -18,6 +18,7 @@
 	};
 
 	let redirectPath: string | undefined = $state(undefined);
+	let fulfilledPromisesCount: number = $state(0);
 
 	if (browser) {
 		data.booking
@@ -26,7 +27,8 @@
 			})
 			.catch(() => {
 				goto(`/kiosk?error=${encodeURIComponent('Booking not found')}`);
-			});
+			})
+			.finally(() => (fulfilledPromisesCount += 1));
 
 		data.recommendation
 			.then((recommendation) => recommendationsStore.set(recommendation))
@@ -34,16 +36,19 @@
 				console.error('Failed to load AI recommendatations');
 				recommendationsStore.set(undefined);
 				goto(`/kiosk?error=${encodeURIComponent('Failed to load AI recommendations')}`);
-			});
+			})
+			.finally(() => (fulfilledPromisesCount += 1));
 	}
 
 	async function handleSpeechEnd() {
-		if (redirectPath) {
-			// Pause briefly so the mascot finishes and there's a small delay before navigation
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			goto(redirectPath);
-		}
+		// Pause briefly so the mascot finishes and there's a small delay before navigation
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+		fulfilledPromisesCount += 1;
 	}
+
+	$effect(() => {
+		if (fulfilledPromisesCount === 3 && redirectPath !== undefined) goto(redirectPath);
+	});
 </script>
 
 <div class="flex-grow bg-white flex items-center justify-center">
