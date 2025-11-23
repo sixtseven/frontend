@@ -72,7 +72,7 @@
 
 	onMount(async () => {
 		// Get driver count from AI recommendation
-		const driverCount = recommendations?.additional_driver_count || 1;
+		const driverCount = recommendations?.additional_driver_count || 0;
 
 		// Initialize quantities based on currentSelection from API
 		data.addonGroups.forEach((group) => {
@@ -80,7 +80,7 @@
 				const key = option.chargeDetail.id;
 				// Pre-select additional drivers = driverCount - 1
 				if (isAdditionalDriver(option)) {
-					selections[key] = Math.max(0, driverCount - 1);
+					selections[key] = Math.max(0, driverCount);
 				} else {
 					selections[key] = option.additionalInfo.selectionStrategy.currentSelection;
 				}
