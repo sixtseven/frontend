@@ -4,15 +4,17 @@
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { goto } from '$app/navigation';
+	import { recommendationsStore } from '$lib/stores';
 
 	interface Props {
 		data: {
 			bookingId: string;
 			addonGroups: AddonGroup[];
-		};
+		}
 	}
 
 	let { data }: Props = $props();
+	let recommendations = $derived($recommendationsStore);
 
 	// Track quantities for each addon option by ID
 	let selections: Record<string, number> = $state({});
@@ -23,11 +25,17 @@
 		Object.values(selections).some(qty => qty > 0) ? 'premium' : 'medium'
 	);
 
+	// Get AI recommendation text if available
+	const avatarText = $derived(
+		recommendations?.additional_driver_recommendation ||
+		"Enhance your rental experience with our premium add-ons! Select any items you'd like to add to make your journey even more comfortable and convenient."
+	);
+
 	// Determine if an addon is "premium" (recommended/nudged)
 	function isPremiumAddon(option: AddonOption): boolean {
-		// You can customize this logic based on your business rules
-		// For now, we'll consider addons with isNudge flag or high importance as premium
-		return option.additionalInfo.isNudge || false;
+		// Check AI recommendations first, then fallback to isNudge flag
+		const isAiRecommended = recommendations?.addons?.some(rec => rec.id === option.chargeDetail.id) || false;
+		return isAiRecommended || option.additionalInfo.isNudge || false;
 	}
 
 	// Check if an addon is a child seat option
@@ -41,6 +49,17 @@
 		);
 	}
 
+	// Check if an addon is additional driver
+	function isAdditionalDriver(option: AddonOption): boolean {
+		const title = option.chargeDetail.title.toLowerCase();
+		const tags = option.chargeDetail.tags.map((t) => t.toLowerCase());
+		return (
+			title.includes('additional driver') ||
+			title.includes('extra driver') ||
+			tags.some((tag) => tag.includes('driver') && (tag.includes('additional') || tag.includes('extra')))
+		);
+	}
+
 	// Group child seats together
 	function getChildSeatOptions(group: AddonGroup): AddonOption[] {
 		return group.options.filter((opt) => isChildSeat(opt));
@@ -51,12 +70,20 @@
 		return group.options.filter((opt) => !isChildSeat(opt));
 	}
 
-	onMount(() => {
+	onMount(async () => {
+		// Get driver count from AI recommendation
+		const driverCount = recommendations?.additional_driver_count || 1;
+
 		// Initialize quantities based on currentSelection from API
 		data.addonGroups.forEach((group) => {
 			group.options.forEach((option) => {
 				const key = option.chargeDetail.id;
-				selections[key] = option.additionalInfo.selectionStrategy.currentSelection;
+				// Pre-select additional drivers = driverCount - 1
+				if (isAdditionalDriver(option)) {
+					selections[key] = Math.max(0, driverCount - 1);
+				} else {
+					selections[key] = option.additionalInfo.selectionStrategy.currentSelection;
+				}
 			});
 		});
 	});
@@ -347,6 +374,7 @@
 				{@const canAdd = quantity < option.additionalInfo.selectionStrategy.maxSelectionLimit}
 				{@const isMulti = option.additionalInfo.selectionStrategy.isMultiSelectionAllowed}
 				{@const isSelected = quantity > 0}
+				{@const isAdditionalDriverAddon = isAdditionalDriver(option)}
 
 				<div class="mb-6 flex justify-center">
 					<div
@@ -354,8 +382,17 @@
 							? 'ring-2 ring-sixt-orange'
 							: 'border border-gray-200'}"
 					>
-						<!-- Header -->
-						<div class="flex gap-4 mb-3">
+					<!-- Recommended badge for additional drivers -->
+					{#if isAdditionalDriverAddon && recommendations?.additional_driver_recommendation}
+						<div
+							class="absolute top-2 left-2 bg-sixt-orange text-white px-4 py-2 rounded text-xs font-bold flex items-center gap-1 shadow z-10"
+						>
+							⭐ Recommended
+						</div>
+					{/if}
+
+					<!-- Header -->
+					<div class="flex gap-4 mb-3 {isAdditionalDriverAddon && recommendations?.additional_driver_recommendation ? 'mt-10' : ''}">
 							<img
 								src={option.chargeDetail.iconUrl}
 								alt={option.chargeDetail.title}
@@ -464,7 +501,7 @@
 <!-- Avatar positioned at bottom right -->
 <div class="fixed bottom-8 right-8 scale-150">
 	<SpeakingAvatar
-		text="Enhance your rental experience with our premium add-ons! Select any items you'd like to add to make your journey even more comfortable and convenient."
+		text={avatarText}
 		variant={avatarVariant}
 		useElevenLabs={true}
 		autoSpeak={true}

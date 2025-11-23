@@ -4,6 +4,7 @@
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { goto } from '$app/navigation';
+	import { recommendationsStore } from '$lib/stores';
 
 	interface Props {
 		data: {
@@ -13,6 +14,7 @@
 	}
 
 	let { data }: Props = $props();
+	let recommendations = $derived($recommendationsStore);
 
 	let selectedProtectionId: string | null = $state(null);
 	let isLoading = $state(false);
@@ -26,6 +28,12 @@
 			if (pkg.ratingStars > best.ratingStars) return pkg;
 			return best;
 		}, data.packages[0])
+	);
+
+	// Get AI recommendation text if available
+	const avatarText = $derived(
+		recommendations?.insurance_recommendation ||
+		"Choose the protection package that best suits your needs. We recommend our premium protection for complete peace of mind during your journey."
 	);
 
 	// Find the worst protection (lowest rating stars)
@@ -328,7 +336,7 @@
 <!-- Avatar positioned at bottom right -->
 <div class="fixed bottom-8 right-8 scale-150">
 	<SpeakingAvatar
-		text="Choose the protection package that best suits your needs. We recommend our premium protection for complete peace of mind during your journey."
+		text={avatarText}
 		variant={avatarVariant}
 		useElevenLabs={true}
 		autoSpeak={true}

@@ -275,7 +275,7 @@
 	<!-- Avatar positioned at bottom right -->
 	<div class="fixed bottom-8 right-8 scale-150">
 		<SpeakingAvatar
-			text="Thank you for choosing SIXT! Have a safe and pleasant journey. We hope to see you again soon!"
+			text="Thank you for choosing sixt. Have a safe and pleasant journey. We hope to see you again soon!"
 			variant="premium"
 			useElevenLabs={true}
 			autoSpeak={true}

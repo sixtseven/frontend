@@ -11,7 +11,7 @@ try {
 	ELEVENLABS_API_KEY = undefined;
 }
 
-const VOICE_ID = 'TxGEqnHWrfWFTfGW9XjX';
+const VOICE_ID = '6IwYbsNENZgAB1dtBZDp';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {

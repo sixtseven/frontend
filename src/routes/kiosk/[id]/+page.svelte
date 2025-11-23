@@ -37,8 +37,10 @@
 			});
 	}
 
-	function handleSpeechEnd() {
+	async function handleSpeechEnd() {
 		if (redirectPath) {
+			// Pause briefly so the mascot finishes and there's a small delay before navigation
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 			goto(redirectPath);
 		}
 	}
