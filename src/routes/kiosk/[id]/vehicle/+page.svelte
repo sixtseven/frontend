@@ -5,6 +5,7 @@
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { recommendationsStore, type Vehicle } from '$lib/stores';
 	import { goto } from '$app/navigation';
+	import { formatDealPrice } from '$lib/utils/formatting';
 
 	let { params }: PageProps = $props();
 	const bookingId = params.id;
@@ -24,30 +25,6 @@
 		if (recommendedDeal === undefined) goto(`/kiosk/${encodeURIComponent(bookingId)}`);
 		else selectedVehicleId = recommendedDeal.vehicle.id;
 	});
-
-	function formatUnit(unit?: string): string {
-		switch (unit) {
-			case 'EUR':
-				return '€';
-			case 'USD':
-				return '$';
-			default:
-				return '';
-		}
-	}
-
-	function formatPrice({
-		amount,
-		currency,
-		prefix
-	}: {
-		amount: number;
-		currency: string;
-		prefix: string;
-		suffix: string;
-	}): string {
-		return `${prefix}${amount.toFixed(2)}${formatUnit(currency)}`;
-	}
 
 	function getMainImage(vehicle: Vehicle): string {
 		return vehicle.images?.[0] || '/placeholder-vehicle.png';
@@ -161,29 +138,22 @@
 
 							<!-- Pricing section -->
 							<div class="mb-3">
-								{#if recommendedDeal.pricing.discountPercentage > 0 && recommendedDeal.pricing.listPrice !== undefined}
-									<div class="text-sm text-gray-500 line-through mb-1">
-										{formatPrice(recommendedDeal.pricing.listPrice)}
-										{recommendedDeal.pricing.listPrice?.suffix}
-									</div>
-								{/if}
-								{#if recommendedDeal.pricing.totalPrice.amount === 0}
-									<div class="text-lg text-gray-600 font-semibold">included</div>
-								{:else}
-									<div class="font-bold text-2xl text-sixt-orange mb-1">
-										<span>{formatPrice(recommendedDeal.pricing.displayPrice)}</span>
-										<span class="text-base font-normal"
-											>{recommendedDeal.pricing.displayPrice.suffix}</span
-										>
-									</div>
-									<div class="text-xs text-gray-600">
-										{formatPrice(recommendedDeal.pricing.totalPrice)}
-										{recommendedDeal.pricing.totalPrice.suffix}
-									</div>
-								{/if}
-							</div>
-
-							<!-- Why this car - bullet points (compact) -->
+							{#if recommendedDeal.pricing.discountPercentage > 0 && recommendedDeal.pricing.listPrice !== undefined}
+								<div class="text-sm text-gray-500 line-through mb-1">
+									{formatDealPrice(recommendedDeal.pricing.listPrice)}
+								</div>
+							{/if}
+							{#if recommendedDeal.pricing.totalPrice.amount === 0}
+								<div class="text-lg text-gray-600 font-semibold">included</div>
+							{:else}
+								<div class="font-bold text-2xl text-sixt-orange mb-1">
+									{formatDealPrice(recommendedDeal.pricing.displayPrice)}
+								</div>
+								<div class="text-xs text-gray-600">
+									{formatDealPrice(recommendedDeal.pricing.totalPrice)}
+								</div>
+							{/if}
+						</div>							<!-- Why this car - bullet points (compact) -->
 							<div class="space-y-3">
 								{#each recommendations?.upsell_reasons as reason}
 									<div class="flex items-start gap-3">
@@ -276,8 +246,7 @@
 							<p class="text-xs text-gray-600">included in your booking</p>
 						{:else}
 							<p class="font-semibold text-sm text-gray-900">
-								{formatPrice(originalDeal.pricing.displayPrice)}
-								<span class="text-xs font-normal">{originalDeal.pricing.displayPrice.suffix}</span>
+								{formatDealPrice(originalDeal.pricing.displayPrice)}
 							</p>
 						{/if}
 					</div>

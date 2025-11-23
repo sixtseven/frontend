@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SixtIcon from '$lib/assets/SixtIcon.svelte';
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
+	import { formatPrice, formatCurrencyUnit } from '$lib/utils/formatting';
 
 	interface Props {
 		data: {
@@ -10,10 +11,6 @@
 	}
 
 	let { data }: Props = $props();
-
-	function formatPrice(amount: number, currency: string = 'EUR'): string {
-		return `${currency === 'EUR' ? '€' : '$'}${(amount / 100).toFixed(2)}`;
-	}
 
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
@@ -32,25 +29,40 @@
 		return images && images.length > 0 ? images[0] : '';
 	}
 
-	// Calculate total cost
-	const totalCost = $derived(() => {
+	// Calculate total price by summing vehicle, protection, and addons
+	const totalPrice = $derived(() => {
 		let total = 0;
 		let currency = 'EUR';
 		
-		// Add vehicle cost
-		if (data.booking.selectedVehicle?.vehicle?.vehicleCost) {
-			total += data.booking.selectedVehicle.vehicle.vehicleCost.value;
-			currency = data.booking.selectedVehicle.vehicle.vehicleCost.currency;
+		// Add vehicle total price
+		if (data.booking.selectedVehicle?.pricing?.totalPrice) {
+			total += data.booking.selectedVehicle.pricing.totalPrice.amount;
+			currency = data.booking.selectedVehicle.pricing.totalPrice.currency;
 		}
 		
-		// Add protection cost
-		if (data.booking.protectionPackages?.price?.displayPrice) {
-			total += data.booking.protectionPackages.price.displayPrice.amount;
-			currency = data.booking.protectionPackages.price.displayPrice.currency;
+		// Add protection total price
+		if (data.booking.protectionPackages?.price?.totalPrice) {
+			total += data.booking.protectionPackages.price.totalPrice.amount;
+			currency = data.booking.protectionPackages.price.totalPrice.currency;
+		}
+		
+		// Add addon prices
+		if (data.booking.addonGroups) {
+			for (const group of data.booking.addonGroups) {
+				for (const option of group.options) {
+					const quantity = data.booking.addons?.[option.chargeDetail.id];
+					if (quantity && quantity > 0) {
+						const addonPrice = option.additionalInfo.price.displayPrice.amount * quantity;
+						total += addonPrice;
+						currency = option.additionalInfo.price.displayPrice.currency;
+					}
+				}
+			}
 		}
 		
 		return { amount: total, currency };
 	});
+
 </script>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
@@ -147,8 +159,11 @@
 						</div>
 						{#if protection.price}
 							<p class="text-lg font-bold text-sixt-orange">
-								{formatPrice(protection.price.displayPrice.amount, protection.price.displayPrice.currency)}
-								<span class="text-sm font-normal">{protection.price.displayPrice.suffix}</span>
+								{formatPrice(
+									protection.price.displayPrice.amount,
+									protection.price.displayPrice.currency,
+									protection.price.displayPrice.suffix
+								)}
 							</p>
 						{/if}
 					</div>
@@ -192,12 +207,12 @@
 		{/if}
 
 		<!-- Total Price -->
-		{#if totalCost().amount > 0}
+		{#if totalPrice()}
 			<div class="bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-200">
 				<div class="flex justify-between items-center">
 					<h3 class="text-2xl font-bold text-gray-900">Total Cost</h3>
 					<p class="text-4xl font-bold text-sixt-orange">
-						{formatPrice(totalCost().amount, totalCost().currency)}
+						{formatPrice(totalPrice().amount, totalPrice().currency)}
 					</p>
 				</div>
 			</div>

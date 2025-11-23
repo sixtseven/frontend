@@ -5,6 +5,7 @@
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { goto } from '$app/navigation';
 	import { recommendationsStore } from '$lib/stores';
+	import { formatPrice } from '$lib/utils/formatting';
 
 	interface Props {
 		data: {
@@ -59,10 +60,6 @@
 			selectedProtectionId = data.packages[0].id;
 		}
 	});
-
-	function formatPrice(amount: number): string {
-		return amount.toFixed(2);
-	}
 
 	function getStarRating(stars: number): string {
 		return '⭐'.repeat(Math.max(stars, 0));
@@ -140,16 +137,22 @@
 							{/if}
 						</div>
 						<div class="text-right ml-6">
-							{#if pkg.price.discountPercentage > 0 && pkg.price.listPrice}
-								<div class="text-sm text-gray-500 line-through mb-1">
-									{formatPrice(pkg.price.listPrice.amount)}
-									{pkg.price.listPrice.suffix}
-								</div>
-							{/if}
-							<div class="font-bold text-2xl text-sixt-orange mb-1">
-								<span>{formatPrice(pkg.price.displayPrice.amount)}</span>
-								<span class="text-base font-normal">{pkg.price.displayPrice.suffix}</span>
+						{#if pkg.price.discountPercentage > 0 && pkg.price.listPrice}
+							<div class="text-sm text-gray-500 line-through mb-1">
+								{formatPrice(
+									pkg.price.listPrice.amount,
+									pkg.price.listPrice.currency,
+									pkg.price.listPrice.suffix
+								)}
 							</div>
+						{/if}
+						<div class="font-bold text-2xl text-sixt-orange mb-1">
+							{formatPrice(
+								pkg.price.displayPrice.amount,
+								pkg.price.displayPrice.currency,
+								pkg.price.displayPrice.suffix
+							)}
+						</div>
 							{#if pkg.price.discountPercentage > 0}
 								<div class="text-xs text-green-600 font-semibold">
 									{pkg.price.discountPercentage}% off
@@ -243,12 +246,19 @@
 					<div class="text-right ml-4 flex-shrink-0">
 						{#if pkg.price.discountPercentage > 0 && pkg.price.listPrice}
 							<div class="text-xs text-gray-500 line-through">
-								{formatPrice(pkg.price.listPrice.amount)}
+								{formatPrice(
+									pkg.price.listPrice.amount,
+									pkg.price.listPrice.currency,
+									pkg.price.listPrice.suffix
+								)}
 							</div>
 						{/if}
 						<div class="font-bold text-base text-sixt-orange">
-							{formatPrice(pkg.price.displayPrice.amount)}
-							<span class="text-xs">{pkg.price.displayPrice.suffix}</span>
+							{formatPrice(
+								pkg.price.displayPrice.amount,
+								pkg.price.displayPrice.currency,
+								pkg.price.displayPrice.suffix
+							)}
 						</div>
 					</div>
 				</div>

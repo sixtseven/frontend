@@ -5,6 +5,7 @@
 	import SpeakingAvatar from '$lib/components/SpeakingAvatar.svelte';
 	import { goto } from '$app/navigation';
 	import { recommendationsStore } from '$lib/stores';
+	import { formatPrice } from '$lib/utils/formatting';
 
 	interface Props {
 		data: {
@@ -33,9 +34,8 @@
 
 	// Determine if an addon is "premium" (recommended/nudged)
 	function isPremiumAddon(option: AddonOption): boolean {
-		// Check AI recommendations first, then fallback to isNudge flag
-		const isAiRecommended = recommendations?.addons?.some(rec => rec.id === option.chargeDetail.id) || false;
-		return isAiRecommended || option.additionalInfo.isNudge || false;
+		// Use the isNudge flag from the API
+		return option.additionalInfo.isNudge || false;
 	}
 
 	// Check if an addon is a child seat option
@@ -87,10 +87,6 @@
 			});
 		});
 	});
-
-	function formatPrice(amount: number): string {
-		return (amount / 100).toFixed(2);
-	}
 
 	function incrementQuantity(addonId: string, option: AddonOption) {
 		const current = selections[addonId] || 0;
@@ -205,8 +201,11 @@
 									</div>
 									<div class="text-right flex-shrink-0 mr-3">
 										<div class="font-bold text-sm text-sixt-orange">
-											{formatPrice(option.additionalInfo.price.displayPrice.amount)}
-											<span class="text-xs">{option.additionalInfo.price.displayPrice.suffix}</span>
+											{formatPrice(
+												option.additionalInfo.price.displayPrice.amount,
+												option.additionalInfo.price.displayPrice.currency,
+												option.additionalInfo.price.displayPrice.suffix
+											)}
 										</div>
 									</div>
 
@@ -290,10 +289,11 @@
 								</div>
 								<div class="text-right flex-shrink-0">
 									<div class="font-bold text-2xl text-sixt-orange mb-1">
-										<span>{formatPrice(option.additionalInfo.price.displayPrice.amount)}</span>
-										<span class="text-base font-normal"
-											>{option.additionalInfo.price.displayPrice.suffix}</span
-										>
+										{formatPrice(
+											option.additionalInfo.price.displayPrice.amount,
+											option.additionalInfo.price.displayPrice.currency,
+											option.additionalInfo.price.displayPrice.suffix
+										)}
 									</div>
 								</div>
 							</div>
@@ -404,8 +404,11 @@
 							</div>
 							<div class="text-right flex-shrink-0">
 								<div class="font-bold text-base text-sixt-orange">
-									{formatPrice(option.additionalInfo.price.displayPrice.amount)}
-									<span class="text-xs">{option.additionalInfo.price.displayPrice.suffix}</span>
+									{formatPrice(
+										option.additionalInfo.price.displayPrice.amount,
+										option.additionalInfo.price.displayPrice.currency,
+										option.additionalInfo.price.displayPrice.suffix
+									)}
 								</div>
 							</div>
 						</div>
