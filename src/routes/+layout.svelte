@@ -12,7 +12,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="min-h-screen bg-white font-sixt flex flex-col">
+<div class="min-h-[100dvh] bg-white font-sixt flex flex-col">
 	<!-- Orange banner at top -->
 	<div class="bg-sixt-orange h-1"></div>
 
