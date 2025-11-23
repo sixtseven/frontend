@@ -114,9 +114,9 @@
 		<div
 			class="bg-white p-8 rounded-lg shadow-md border-l-4 border-sixt-orange hover:shadow-xl transition-shadow"
 		>
-			<div class="text-4xl mb-4">🔐</div>
-			<h3 class="text-2xl font-bold text-gray-900 mb-4">Secure</h3>
-			<p class="text-gray-600">Your data is encrypted and securely stored.</p>
+			<div class="text-4xl mb-4">🕐</div>
+			<h3 class="text-2xl font-bold text-gray-900 mb-4">24/7</h3>
+			<p class="text-gray-600">Available anytime, day or night for key retrieval.</p>
 		</div>
 
 		<div
