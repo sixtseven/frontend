@@ -59,6 +59,9 @@
 				throw new Error(`Failed to confirm vehicle: ${response.statusText}`);
 			}
 
+			if(recommendations)
+				recommendationsStore.set({chosen_car: selectedVehicleId === recommendedDeal?.vehicle.id ? 'upsell' : 'base', ...recommendations})
+
 			// Navigate to next step
 			goto(`/kiosk/${encodeURIComponent(bookingId)}/protections`);
 		} catch (err) {
